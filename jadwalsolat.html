@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Timer Sholat — Offline</title>
+  <script src="jadwalsholat.js"></script>
+  <script src="quotes.js"></script>
+  <style>
+    html,body{margin:0;height:100%;font-family:system-ui,sans-serif;background:#fff;color:#0b1220}
+    body{display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
+    #mainText{font-size:clamp(32px,8vw,80px);font-weight:700;line-height:1.2;margin-bottom:20px}
+    #mainText span{color:#ef6c00;font-weight:400}
+    #intervalText{font-size:18px;color:#444;margin-bottom:20px}
+    .progress{width:100%;max-width:600px;height:10px;background:rgba(11,18,32,0.08);border-radius:999px;overflow:hidden;margin:12px auto}
+    .progress>i{display:block;height:100%;width:0%;background:#4aa8ff;transition:width 600ms linear}
+    #quote{margin-top:40px;font-size:16px;color:#666;max-width:600px;white-space:pre-line;margin-left:auto;margin-right:auto}
+  </style>
+</head>
+<body>
+  <main>
+    <div id="mainText"><strong>—</strong><span><i></i></span></div>
+    <div id="intervalText">—</div>
+    <div class="progress"><i id="intervalProgress"></i></div>
+    <div id="quote">"Quotes & Jadwal disini"</div>
+  </main>
+
+  <script>
+    const TZ='Asia/Jakarta';const IQOMAH_MIN=15*60000;
+    const pad=n=>String(n).padStart(2,'0');
+    const fmtHM=d=>pad(d.getHours())+':'+pad(d.getMinutes());
+    const nowJakarta=()=>new Date(new Date().toLocaleString('en-US',{timeZone:TZ}));
+    function getKey(d){const parts=new Intl.DateTimeFormat('en-CA',{timeZone:TZ,month:'2-digit',day:'2-digit'}).formatToParts(d);return parts.find(p=>p.type==='month').value+'-'+parts.find(p=>p.type==='day').value;}
+    function parseHM(hm,base){const[h,m]=hm.split(':').map(Number);const parts=new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(base);const y=parts.find(p=>p.type==='year').value;const M=parts.find(p=>p.type==='month').value;const D=parts.find(p=>p.type==='day').value;return new Date(`${y}-${M}-${D}T${pad(h)}:${pad(m)}:00+07:00`);}
+    function getTodayTimes(d){return(typeof prayerTimesData!=='undefined')?prayerTimesData[getKey(d)]:null;}
+    function buildPrayers(now){const list=[];const today=getTodayTimes(now);if(today){list.push(['Subuh',today.Shubuh]);list.push(['Dhuhur',today.Dzuhur]);list.push(['Ashar',today.Ashr]);list.push(['Magrib',today.Maghrib]);list.push(['Isya',today.Isya]);}const tmr=getTodayTimes(new Date(now.getTime()+86400000));if(tmr)list.push(['Subuh (besok)',tmr.Shubuh]);return list.map(([name,hm])=>({name,hm,when:parseHM(hm,name.includes('(besok)')?new Date(now.getTime()+86400000):now)}));}
+    function findPrevNext(prayers,now){let next=prayers.find(p=>p.when>=now);if(!next)next=prayers[0];const prevCandidates=prayers.filter(p=>p.when<next.when);let prev=prevCandidates.length?prevCandidates[prevCandidates.length-1]:null;if(!prev){const y=new Date(now.getTime()-86400000);const ylist=buildPrayers(y);if(ylist.length)prev=ylist[ylist.length-1];}return{prev,next};}
+
+    const fallbackQuotes=["Belajar adalah cahaya hidup","Waktu adalah pedang"];
+    let quotesList=(typeof quotes!=='undefined'&&Array.isArray(quotes)&&quotes.length>0)?quotes.slice():fallbackQuotes.slice();let quoteIndex=0;
+    function showNextQuote(){if(!quotesList||quotesList.length===0)quotesList=fallbackQuotes.slice();document.getElementById('quote').textContent='"'+quotesList[quoteIndex%quotesList.length]+'"';quoteIndex++;}
+    setInterval(showNextQuote,30000);showNextQuote();
+
+    function updateAll(){const now=nowJakarta();const prayers=buildPrayers(now).filter(p=>!isNaN(p.when));if(prayers.length===0){document.getElementById('mainText').innerHTML='<strong>Jadwal tidak tersedia</strong>';return;}const {prev,next}=findPrevNext(prayers,now);const adzanTime=next.when;const iqomahEnd=new Date(adzanTime.getTime()+IQOMAH_MIN);
+      const mainEl=document.getElementById('mainText');if(now<adzanTime){const diff=adzanTime-now;const hh=Math.floor(diff/3600000);const mm=Math.floor((diff%3600000)/60000);mainEl.innerHTML=`<strong>${hh>0?hh+" Jam ":""}${mm} menit </strong><span><i>lagi adzan ${next.name}</i></span>`;}else if(now>=adzanTime&&now<iqomahEnd){const diff=Math.ceil((iqomahEnd-now)/60000);mainEl.innerHTML=`<strong>${diff} menit lagi</strong><span><i> iqomah</i></span>`;}else{mainEl.innerHTML='<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';}
+      if(prev&&next){const intervalText=document.getElementById('intervalText');const deltaMs=now-prev.when;const deltaH=Math.floor(deltaMs/3600000);const deltaM=Math.floor((deltaMs%3600000)/60000);intervalText.innerHTML=`${deltaH>0?deltaH+' jam ':''}${deltaM} menit dari ${prev.name} Menuju <strong>${next.name} Jam ${next.hm}</strong>`;const total=next.when-prev.when;const elapsed=Math.max(0,now-prev.when);document.getElementById('intervalProgress').style.width=(elapsed/total*100).toFixed(1)+'%';}}
+    updateAll();setInterval(updateAll,1000);
+  </script>
+</body>
+</html>
