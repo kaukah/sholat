@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Timer Sholat</title>
+  <title>Timer Sholat — Offline</title>
   <script src="jadwalsholat.js"></script>
   <script src="quotes.js"></script>
 
@@ -14,19 +14,63 @@
     #mainText{font-size:clamp(32px,8vw,80px);font-weight:700;line-height:1.2;margin-bottom:20px}
     #mainText span{color:#ef6c00;font-weight:400}
     #intervalText{font-size:18px;color:#444;margin-bottom:20px}
-    .progress{width:100%;max-width:600px;height:30px;background:rgba(11,18,32,0.08);border-radius:999px;overflow:hidden;margin:12px auto}
-    .progress>i {
-  display:block;
-  height:100%;
-  width:0%;
-  background:linear-gradient(90deg,#4aa8ff,#8b5cf6); /* <– dua warna */
-  transition:width 600ms linear;
+   .progress {
+  width: 100%;
+  max-width: 600px;
+  height: 30px;
+  background: rgba(11,18,32,0.08);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 12px auto;
+}
+
+.progress > i {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  
+  /* Gabungkan gradasi utama dengan pola arus */
+  background-image: 
+    linear-gradient(90deg, #4aa8ff, #8b5cf6), /* gradasi dasar */
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.15),
+      rgba(255, 255, 255, 0.15) 15px,
+      transparent 15px,
+      transparent 30px
+    );
+  
+  background-size: auto, 30px 30px;  /* gradasi penuh + pola strip */
+  background-blend-mode: overlay;    /* campur strip di atas gradasi */
+  
+  /* animasi lebar progres */
+  transition: width 600ms linear;
+
+  /* animasi arus bergerak */
+  animation: flow-animation 1s linear infinite;
+}
+
+/* Keyframes untuk geser pola strip */
+@keyframes flow-animation {
+  from {
+    background-position: 0 0, 0 0;
+  }
+  to {
+    background-position: 0 0, 30px 0;
+  }
 }
     #quote{margin-top:40px;font-size:16px;color:#666;max-width:600px;white-space:pre-line;margin-left:auto;margin-right:auto}
   </style>
 </head>
 <body>
   <main>
+
+<span><div class="status-bar" style="color:gray;margin-top:-20px;margin-bottom:30px;font-size: 12px;">
+  <span class="battery">🔋 ...</span>
+  <span class="internet-speed">🌐 ...</span>
+</div></span>
+
     <div id="mainText"><strong>—</strong><span><i></i></span></div>
     <div id="intervalText">—</div>
     <div class="progress"><i id="intervalProgress"></i></div>
@@ -118,6 +162,70 @@ function showNextQuote() {
 setInterval(showNextQuote, 30000);
 showNextQuote();
 
+
+
+// =============================
+// BATTERY INFO (lengkap)
+// =============================
+function initBattery() {
+  const el = document.querySelector('.battery');
+  if (!navigator.getBattery) {
+    el.textContent = "🔋 N/A";
+    return;
+  }
+  navigator.getBattery().then(function(battery) {
+    function updateBattery() {
+      let level = Math.round(battery.level * 100);
+      let charging = battery.charging ? "Charging" : "Not Charging";
+      let time = "";
+      if (battery.charging && battery.chargingTime !== Infinity) {
+        let h = Math.floor(battery.chargingTime / 3600);
+        let m = Math.floor((battery.chargingTime % 3600) / 60);
+        time = `Baterai Full: ${h} jam ${m} menit`;
+      } else if (!battery.charging && battery.dischargingTime !== Infinity) {
+        let h = Math.floor(battery.dischargingTime / 3600);
+        let m = Math.floor((battery.dischargingTime % 3600) / 60);
+        time = ` ${h} jam ${m} menit`;
+      }
+      el.innerHTML = `
+        <div>🔋 ${level}% ⚡ ${charging} ⏳ ${time}</div>
+      `;
+    }
+    updateBattery();
+    battery.addEventListener('levelchange', updateBattery);
+    battery.addEventListener('chargingchange', updateBattery);
+    battery.addEventListener('chargingtimechange', updateBattery);
+    battery.addEventListener('dischargingtimechange', updateBattery);
+  });
+}
+
+// =============================
+// INTERNET INFO (lengkap)
+// =============================
+function initInternetInfo() {
+  const speedEl = document.querySelector('.internet-speed');
+  if (!speedEl) return;
+
+  function updateInfo() {
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    let downlink = conn ? `${conn.downlink} Mbps` : "N/A";
+    let connInfo = conn ? 
+      `${conn.effectiveType.toUpperCase()} • 🔴 ${conn.rtt} ms • ${conn.saveData ? '🍃 Mode Hemat' : '♻️ Disable'}` 
+      : "No connection info";
+
+    speedEl.innerHTML = `
+      <div>🚀 ${downlink} • 🌐 ${connInfo}  • ${navigator.onLine ? '🛜 Online' : '🚫 Not Online'}</div>
+    `;
+  }
+
+  updateInfo();
+  window.addEventListener('online', updateInfo);
+  window.addEventListener('offline', updateInfo);
+  if (navigator.connection) navigator.connection.addEventListener('change', updateInfo);
+}
+
+
+
 function updateAll() {
     const now = nowJakarta();
     const prayers = buildPrayers(now).filter(p => !isNaN(p.when));
@@ -155,10 +263,17 @@ function updateAll() {
         document.getElementById('intervalProgress').style.width = (elapsed / total * 100).toFixed(1) + '%';
     }
 }
+
+
 updateAll();
 setInterval(updateAll, 1000);
 
 
+
+window.addEventListener('load', () => {
+  initBattery();
+  initInternetInfo();
+});
 
   </script>
   
