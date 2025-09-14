@@ -9,16 +9,16 @@
 
   
   <style>
-    html,body{margin:0;height:100%;font-family:system-ui,sans-serif;background:#fff;color:#0b1220}
+    html,body{margin:0;height:100%;font-family:system-ui,sans-serif;background:#fff;color:#333}
     body{display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
     #mainText{font-size:clamp(32px,8vw,80px);font-weight:700;line-height:1.2;margin-bottom:20px}
-    #mainText span{color:#ef6c00;font-weight:400}
-    #intervalText{font-size:18px;color:#444;margin-bottom:20px}
+    #mainText span{color:#FFAA00;font-weight:400}
+    #intervalText{font-size:18px;color:#333;margin-bottom:20px}
    .progress {
   width: 100%;
   max-width: 600px;
   height: 30px;
-  background: rgba(11,18,32,0.08);
+  background: #cccccc;
   border-radius: 999px;
   overflow: hidden;
   margin: 12px auto;
@@ -60,21 +60,60 @@
     background-position: 0 0, 30px 0;
   }
 }
-    #quote{margin-top:40px;font-size:16px;color:#666;max-width:600px;white-space:pre-line;margin-left:auto;margin-right:auto}
+    #quote{margin-top:40px;font-size:28px;color:#adadad;max-width:900wh;white-space:pre-line;margin-left:auto;margin-right:auto}
+    
+    
+    
+    
+    /* Default (light mode) */
+body {
+  background: #fff;
+  color: #0b1220;
+}
+
+/* Dark mode */
+body.dark {
+  background: #000;
+  color: #fff;
+}
+
+body.dark #mainText span {
+  color: #ffb74d; /* oranye lembut */
+}
+
+body.dark #intervalText {
+  color: #bbb;
+}
+
+body.dark #quote {
+  color: #4d4d4d;
+}
+
   </style>
 </head>
-<body>
+<body class="dark">
   <main>
 
 <span><div class="status-bar" style="color:gray;margin-top:-20px;margin-bottom:30px;font-size: 12px;">
   <span class="battery">🔋 ...</span>
   <span class="internet-speed">🌐 ...</span>
+    <div class="info ip-info">🛜 IP: Loading...</div>
+
 </div></span>
 
     <div id="mainText"><strong>—</strong><span><i></i></span></div>
     <div id="intervalText">—</div>
     <div class="progress"><i id="intervalProgress"></i></div>
     <div id="quote">"Quotes & Jadwal disini"</div>
+    
+<button id="toggleTheme" style="
+  position:absolute;top:10px;right:10px;
+  background:none;border:1px solid #666;
+  border-radius:8px;padding:6px 12px;
+  cursor:pointer;color:inherit;
+">🌓</button>
+
+
   </main>
 
 
@@ -152,16 +191,93 @@ function findPrevNext(prayers, now) {
 
 const fallbackQuotes = ["Belajar adalah cahaya hidup", "Waktu adalah pedang"];
 let quotesList = (typeof quotes !== 'undefined' && Array.isArray(quotes) && quotes.length > 0) ? quotes.slice() : fallbackQuotes.slice();
-let quoteIndex = 0;
+let quoteIndex = Math.floor(Math.random() * quotesList.length);
+
 
 function showNextQuote() {
     if (!quotesList || quotesList.length === 0) quotesList = fallbackQuotes.slice();
-    document.getElementById('quote').textContent = '"' + quotesList[quoteIndex % quotesList.length] + '"';
-    quoteIndex++;
+    const randomIndex = Math.floor(Math.random() * quotesList.length);
+    document.getElementById('quote').textContent = '"' + quotesList[randomIndex] + '"';
 }
+
+
 setInterval(showNextQuote, 30000);
 showNextQuote();
 
+
+
+
+const themeBtn = document.getElementById('toggleTheme');
+
+// baca preferensi user dari localStorage
+if (localStorage.getItem('theme') === 'dark') {
+  document.body.classList.add('dark');
+}
+
+themeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  if (document.body.classList.contains('dark')) {
+    localStorage.setItem('theme', 'dark');
+  } else {
+    localStorage.setItem('theme', 'light');
+  }
+});
+
+
+// =============================
+// JADWAL SHOLAT SRAGEN
+// =============================
+function updateAll() {
+    const now = nowJakarta();
+    const prayers = buildPrayers(now).filter(p => !isNaN(p.when));
+    if (prayers.length === 0) {
+        document.getElementById('mainText').innerHTML = '<strong>Jadwal tidak tersedia</strong>';
+        return;
+    }
+
+    const { prev, next } = findPrevNext(prayers, now);
+    const adzanTime = next.when;
+    const iqomahEnd = new Date(adzanTime.getTime() + IQOMAH_MIN);
+
+    const mainEl = document.getElementById('mainText');
+    if (now < adzanTime) {
+        const diff = adzanTime - now;
+        const hh = Math.floor(diff / 3600000);
+        const mm = Math.floor((diff % 3600000) / 60000);
+        mainEl.innerHTML = `<strong>${hh > 0 ? hh + " Jam " : ""}${mm} menit </strong><span><i>lagi adzan ${next.name}</i></span>`;
+    } else if (now >= adzanTime && now < iqomahEnd) {
+        const diff = Math.ceil((iqomahEnd - now) / 60000);
+        mainEl.innerHTML = `<strong>${diff} menit lagi</strong><span><i> iqomah</i></span>`;
+    } else {
+        mainEl.innerHTML = '<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';
+    }
+
+    if (prev && next) {
+        const intervalText = document.getElementById('intervalText');
+        const deltaMs = now - prev.when;
+        const deltaH = Math.floor(deltaMs / 3600000);
+        const deltaM = Math.floor((deltaMs % 3600000) / 60000);
+
+        // ✨ Hitung info Tahajud (jam 04:00 vs Subuh besok)
+        let tahajudInfo = '';
+        const besok = new Date(now.getTime() + 86400000);
+        const prayersBesok = buildPrayers(besok);
+        const nextSubuhBesok = prayersBesok.find(p => p.name.includes('Subuh'));
+        if (nextSubuhBesok) {
+            let tahajudTime = new Date(nextSubuhBesok.when);
+            tahajudTime.setHours(4, 0, 0, 0); // jam 04:00 besok
+            let diffTahajud = Math.round((nextSubuhBesok.when - tahajudTime) / 60000);
+            tahajudInfo = ` ⏳ <strong>Tahajud</strong> ${diffTahajud} menit (besok)`;
+        }
+
+        intervalText.innerHTML =
+            `🏃‍♂️‍➡️ <strong>${prev.name}</strong> + ${deltaH > 0 ? deltaH + ':' : ''}${deltaM} 🕌 <strong>${next.name}</strong> ${next.hm}${tahajudInfo}`;
+
+        const total = next.when - prev.when;
+        const elapsed = Math.max(0, now - prev.when);
+        document.getElementById('intervalProgress').style.width = (elapsed / total * 100).toFixed(1) + '%';
+    }
+}
 
 
 // =============================
@@ -170,7 +286,7 @@ showNextQuote();
 function initBattery() {
   const el = document.querySelector('.battery');
   if (!navigator.getBattery) {
-    el.textContent = "🔋 N/A";
+    el.textContent = "-";
     return;
   }
   navigator.getBattery().then(function(battery) {
@@ -208,10 +324,10 @@ function initInternetInfo() {
 
   function updateInfo() {
     const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-    let downlink = conn ? `${conn.downlink} Mbps` : "N/A";
+    let downlink = conn ? `${conn.downlink} Mbps` : "-";
     let connInfo = conn ? 
       `${conn.effectiveType.toUpperCase()} • 🔴 ${conn.rtt} ms • ${conn.saveData ? '🍃 Mode Hemat' : '♻️ Disable'}` 
-      : "No connection info";
+      : "-";
 
     speedEl.innerHTML = `
       <div>🚀 ${downlink} • 🌐 ${connInfo}  • ${navigator.onLine ? '🛜 Online' : '🚫 Not Online'}</div>
@@ -226,54 +342,36 @@ function initInternetInfo() {
 
 
 
-function updateAll() {
-    const now = nowJakarta();
-    const prayers = buildPrayers(now).filter(p => !isNaN(p.when));
-    if (prayers.length === 0) {
-        document.getElementById('mainText').innerHTML = '<strong>Jadwal tidak tersedia</strong>';
-        return;
-    }
-    const {
-        prev,
-        next
-    } = findPrevNext(prayers, now);
-    const adzanTime = next.when;
-    const iqomahEnd = new Date(adzanTime.getTime() + IQOMAH_MIN);
-    const mainEl = document.getElementById('mainText');
-    if (now < adzanTime) {
-        const diff = adzanTime - now;
-        const hh = Math.floor(diff / 3600000);
-        const mm = Math.floor((diff % 3600000) / 60000);
-        mainEl.innerHTML = `<strong>${hh>0?hh+" Jam ":""}${mm} menit </strong><span><i>lagi adzan ${next.name}</i></span>`;
-    } else if (now >= adzanTime && now < iqomahEnd) {
-        const diff = Math.ceil((iqomahEnd - now) / 60000);
-        mainEl.innerHTML = `<strong>${diff} menit lagi</strong><span><i> iqomah</i></span>`;
-    } else {
-        mainEl.innerHTML = '<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';
-    }
-    if (prev && next) {
-        const intervalText = document.getElementById('intervalText');
-        const deltaMs = now - prev.when;
-        const deltaH = Math.floor(deltaMs / 3600000);
-        const deltaM = Math.floor((deltaMs % 3600000) / 60000);
 
-        intervalText.innerHTML = `<strong>${prev.name}</strong> sudah lewat ${deltaH > 0 ? deltaH + ' jam ' : ''}${deltaM} menit 🕌 <strong>${next.name} Jam ${next.hm}</strong>`;
-        const total = next.when - prev.when;
-        const elapsed = Math.max(0, now - prev.when);
-        document.getElementById('intervalProgress').style.width = (elapsed / total * 100).toFixed(1) + '%';
-    }
-}
 
+    // =============================
+    // IP INFO
+    // =============================
+    async function initIP() {
+      const el = document.querySelector('.ip-info');
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const data = await res.json();
+        el.innerHTML = `🌎 IP: ${data.ip}`;
+      } catch (err) {
+        el.innerHTML = "🌎 IP: Error";
+      }
+    }
+
+
+
+    // =============================
+    // INIT
+    // =============================
+    window.addEventListener('load', () => {
+      initBattery();
+      initInternetInfo();
+      initIP();
+    });
 
 updateAll();
 setInterval(updateAll, 1000);
 
-
-
-window.addEventListener('load', () => {
-  initBattery();
-  initInternetInfo();
-});
 
   </script>
   
