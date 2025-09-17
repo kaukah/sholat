@@ -223,7 +223,6 @@ themeBtn.addEventListener('click', () => {
   }
 });
 
-
 // =============================
 // JADWAL SHOLAT SRAGEN
 // =============================
@@ -235,49 +234,78 @@ function updateAll() {
         return;
     }
 
-    const { prev, next } = findPrevNext(prayers, now);
-    const adzanTime = next.when;
-    const iqomahEnd = new Date(adzanTime.getTime() + IQOMAH_MIN);
+    // default prev/next
+    let { prev, next } = findPrevNext(prayers, now);
 
+    // cek apakah kita sedang dalam waktu iqomah
+    const currentAdzan = prayers.find(p => {
+        const start = p.when;
+        const end = new Date(start.getTime() + IQOMAH_MIN);
+        return now >= start && now < end;
+    });
+
+    // kalau sedang iqomah, gunakan currentAdzan sbg next sementara
+    let upcoming = currentAdzan || next;
+
+    // kalau pakai currentAdzan, prev harus prayer sebelumnya
+    if (currentAdzan) {
+        const idx = prayers.indexOf(currentAdzan);
+        if (idx > 0) {
+            prev = prayers[idx - 1];
+        } else {
+            // fallback ke sholat terakhir kemarin
+            const ylist = buildPrayers(new Date(now.getTime() - 86400000));
+            if (ylist.length) prev = ylist[ylist.length - 1];
+        }
+    }
+
+    const adzanTime = upcoming.when;
+    const iqomahEnd = new Date(adzanTime.getTime() + IQOMAH_MIN);
     const mainEl = document.getElementById('mainText');
+
     if (now < adzanTime) {
+        // sebelum adzan
         const diff = adzanTime - now;
         const hh = Math.floor(diff / 3600000);
         const mm = Math.floor((diff % 3600000) / 60000);
-        mainEl.innerHTML = `<strong>${hh > 0 ? hh + " Jam " : ""}${mm} menit </strong><span><i>lagi adzan ${next.name}</i></span>`;
+        mainEl.innerHTML = `<strong>${hh > 0 ? hh + " Jam " : ""}${mm} menit </strong><span><i>lagi adzan ${upcoming.name}</i></span>`;
     } else if (now >= adzanTime && now < iqomahEnd) {
+        // dalam waktu iqomah
         const diff = Math.ceil((iqomahEnd - now) / 60000);
-        mainEl.innerHTML = `<strong>${diff} menit lagi</strong><span><i> iqomah</i></span>`;
+        mainEl.innerHTML = `<strong>${diff} menit</strong><span><i> lagi iqomah ${upcoming.name}</i></span>`;
     } else {
+        // lewat iqomah
         mainEl.innerHTML = '<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';
     }
 
-    if (prev && next) {
+    // interval progress
+    if (prev && upcoming) {
         const intervalText = document.getElementById('intervalText');
         const deltaMs = now - prev.when;
         const deltaH = Math.floor(deltaMs / 3600000);
         const deltaM = Math.floor((deltaMs % 3600000) / 60000);
 
-        // ✨ Hitung info Tahajud (jam 04:00 vs Subuh besok)
+        // ✨ Tambah info Tahajud
         let tahajudInfo = '';
         const besok = new Date(now.getTime() + 86400000);
         const prayersBesok = buildPrayers(besok);
-        const nextSubuhBesok = prayersBesok.find(p => p.name.includes('Subuh'));
+        const nextSubuhBesok = prayersBesok.find(p => p.name.toLowerCase().includes('subuh'));
         if (nextSubuhBesok) {
-            let tahajudTime = new Date(nextSubuhBesok.when);
+            const tahajudTime = new Date(nextSubuhBesok.when);
             tahajudTime.setHours(4, 0, 0, 0); // jam 04:00 besok
-            let diffTahajud = Math.round((nextSubuhBesok.when - tahajudTime) / 60000);
+            const diffTahajud = Math.round((nextSubuhBesok.when - tahajudTime) / 60000);
             tahajudInfo = ` ⏳ <strong>Tahajud</strong> ${diffTahajud} menit (besok)`;
         }
 
         intervalText.innerHTML =
-            `🏃‍♂️‍➡️ <strong>${prev.name}</strong> + ${deltaH > 0 ? deltaH + ':' : ''}${deltaM} 🕌 <strong>${next.name}</strong> ${next.hm}${tahajudInfo}`;
+            `🏃‍♂️‍➡️ <strong>${prev.name}</strong> + ${deltaH > 0 ? deltaH + ':' : ''}${deltaM} 🕌 <strong>${upcoming.name}</strong> ${upcoming.hm}${tahajudInfo}`;
 
-        const total = next.when - prev.when;
+        const total = upcoming.when - prev.when;
         const elapsed = Math.max(0, now - prev.when);
         document.getElementById('intervalProgress').style.width = (elapsed / total * 100).toFixed(1) + '%';
     }
 }
+
 
 
 // =============================
