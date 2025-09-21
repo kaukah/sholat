@@ -11,7 +11,7 @@
   <style>
     html,body{margin:0;height:100%;font-family:system-ui,sans-serif;background:#fff;color:#333}
     body{display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
-    #mainText{font-size:clamp(32px,8vw,80px);font-weight:700;line-height:1.2;margin-bottom:20px}
+    #mainText{font-size:clamp(32px,8vw,80px);font-weight:700;line-height:1.2;margin-bottom:20px;margin-top:20px}
     #mainText span{color:#FFAA00;font-weight:400}
     #intervalText{font-size:18px;color:#333;margin-bottom:20px}
    .progress {
@@ -60,7 +60,7 @@
     background-position: 0 0, 30px 0;
   }
 }
-    #quote{margin-top:40px;font-size:28px;color:#adadad;max-width:900wh;white-space:pre-line;margin-left:auto;margin-right:auto}
+    #quote{margin-top:-20px;font-size:28px;color:#adadad;max-width:900wh;white-space:pre-line;margin-left:auto;margin-right:auto}
     
     
     
@@ -94,17 +94,23 @@ body.dark #quote {
 <body class="dark">
   <main>
 
-<span><div class="status-bar" style="color:gray;margin-top:-20px;margin-bottom:30px;font-size: 12px;">
+
+
+
+    <div id="quote">"Quotes & Jadwal disini"</div>
+    <div id="mainText"><strong>—</strong><span><i></i></span></div>
+    <div id="intervalText">—</div>
+    <div class="progress"><i id="intervalProgress"></i></div>
+    
+    
+    <span><div class="status-bar" style="color:gray;margin-top:0px;margin-bottom:30px;font-size: 12px;">
   <span class="battery">🔋 ...</span>
   <span class="internet-speed">🌐 ...</span>
     <div class="info ip-info">🛜 IP: Loading...</div>
 
 </div></span>
 
-    <div id="mainText"><strong>—</strong><span><i></i></span></div>
-    <div id="intervalText">—</div>
-    <div class="progress"><i id="intervalProgress"></i></div>
-    <div id="quote">"Quotes & Jadwal disini"</div>
+
     
 <button id="toggleTheme" style="
   position:absolute;top:10px;right:10px;
