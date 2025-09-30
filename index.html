@@ -1,3 +1,5 @@
+
+
 <!doctype html>
 <html lang="id">
 <head>
@@ -7,167 +9,410 @@
   <script src="jadwalsholat.js"></script>
   <script src="quotes.js"></script>
 
+  
   <style>
     html,body{margin:0;height:100%;font-family:system-ui,sans-serif;background:#fff;color:#333}
     body{display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
     #mainText{font-size:clamp(32px,8vw,80px);font-weight:700;line-height:1.2;margin-bottom:20px;margin-top:80px}
     #mainText span{color:#FFAA00;font-weight:400}
     #intervalText{font-size:18px;color:#333;margin-bottom:20px}
-    .progress {
-      width: 100%;
-      max-width: 600px;
-      height: 30px;
-      background: #cccccc;
-      border-radius: 999px;
-      overflow: hidden;
-      margin: 12px auto;
-    }
-    .progress > i {
-      display: block;
-      height: 100%;
-      width: 0%;
-      border-radius: inherit;
-      background-image: 
-        linear-gradient(90deg, #4aa8ff, #8b5cf6),
-        repeating-linear-gradient(-45deg,rgba(255,255,255,0.15),rgba(255,255,255,0.15) 15px,transparent 15px,transparent 30px);
-      background-size: auto, 30px 30px;
-      background-blend-mode: overlay;
-      transition: width 600ms linear;
-      animation: flow-animation 1s linear infinite;
-    }
-    @keyframes flow-animation {
-      from { background-position: 0 0, 0 0; }
-      to { background-position: 0 0, 30px 0; }
-    }
+   .progress {
+  width: 100%;
+  max-width: 600px;
+  height: 30px;
+  background: #cccccc;
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 12px auto;
+}
+
+.progress > i {
+  display: block;
+  height: 100%;
+  width: 0%;
+  border-radius: inherit;
+  
+  /* Gabungkan gradasi utama dengan pola arus */
+  background-image: 
+    linear-gradient(90deg, #4aa8ff, #8b5cf6), /* gradasi dasar */
+    repeating-linear-gradient(
+      -45deg,
+      rgba(255, 255, 255, 0.15),
+      rgba(255, 255, 255, 0.15) 15px,
+      transparent 15px,
+      transparent 30px
+    );
+  
+  background-size: auto, 30px 30px;  /* gradasi penuh + pola strip */
+  background-blend-mode: overlay;    /* campur strip di atas gradasi */
+  
+  /* animasi lebar progres */
+  transition: width 600ms linear;
+
+  /* animasi arus bergerak */
+  animation: flow-animation 1s linear infinite;
+}
+
+/* Keyframes untuk geser pola strip */
+@keyframes flow-animation {
+  from {
+    background-position: 0 0, 0 0;
+  }
+  to {
+    background-position: 0 0, 30px 0;
+  }
+}
     #quote{margin-top:-20px;font-size:32px;color:#adadad;max-width:900wh;white-space:pre-line;margin-left:auto;margin-right:auto}
-    body { background: #fff; color: #0b1220; }
-    body.dark { background: #000; color: #fff; }
-    body.dark #mainText span { color: #ffb74d; }
-    body.dark #intervalText { color: #bbb; }
-    body.dark #quote { color: #4d4d4d; }
+    
+    
+    
+    
+    /* Default (light mode) */
+body {
+  background: #fff;
+  color: #0b1220;
+}
+
+/* Dark mode */
+body.dark {
+  background: #000;
+  color: #fff;
+}
+
+body.dark #mainText span {
+  color: #ffb74d; /* oranye lembut */
+}
+
+body.dark #intervalText {
+  color: #bbb;
+}
+
+body.dark #quote {
+  color: #4d4d4d;
+}
+
   </style>
 </head>
 <body class="dark">
   <main>
+
+
+
+
     <div id="quote">"Quotes & Jadwal disini"</div>
     <div id="mainText"><strong>—</strong><span><i></i></span></div>
     <div id="intervalText">—</div>
     <div class="progress"><i id="intervalProgress"></i></div>
-    <div class="status-bar" style="color:gray;margin-top:0px;margin-bottom:30px;font-size: 12px;">
-      <span class="battery">🔋 ...</span>
-      <span class="internet-speed">🌐 ...</span>
-      <div class="info ip-info">🛜 IP: Loading...</div>
-    </div>
-    <button id="toggleTheme" style="position:absolute;top:10px;right:10px;
-      background:none;border:1px solid #666;
-      border-radius:8px;padding:6px 12px;
-      cursor:pointer;color:inherit;">🌓</button>
+    
+    
+    <span><div class="status-bar" style="color:gray;margin-top:0px;margin-bottom:30px;font-size: 12px;">
+  <span class="battery">🔋 ...</span>
+  <span class="internet-speed">🌐 ...</span>
+    <div class="info ip-info">🛜 IP: Loading...</div>
+
+</div></span>
+
+
+    
+<button id="toggleTheme" style="
+  position:absolute;top:10px;right:10px;
+  background:none;border:1px solid #666;
+  border-radius:8px;padding:6px 12px;
+  cursor:pointer;color:inherit;
+">🌓</button>
+
+
   </main>
+
 
   <script>
 const TZ = 'Asia/Jakarta';
 const IQOMAH_MIN = 15 * 60000;
 const pad = n => String(n).padStart(2, '0');
 const fmtHM = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
-const nowJakarta = () => new Date(new Date().toLocaleString('en-US',{ timeZone: TZ }));
+const nowJakarta = () => new Date(new Date().toLocaleString('en-US', {
+    timeZone: TZ
+}));
 
 function getKey(d) {
-  const parts = new Intl.DateTimeFormat('en-CA',{timeZone:TZ,month:'2-digit',day:'2-digit'}).formatToParts(d);
-  return parts.find(p=>p.type==='month').value+'-'+parts.find(p=>p.type==='day').value;
+    const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: TZ,
+        month: '2-digit',
+        day: '2-digit'
+    }).formatToParts(d);
+    return parts.find(p => p.type === 'month').value + '-' + parts.find(p => p.type === 'day').value;
 }
+
 function parseHM(hm, base) {
-  const [h, m] = hm.split(':').map(Number);
-  const parts = new Intl.DateTimeFormat('en-CA',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(base);
-  const y = parts.find(p=>p.type==='year').value;
-  const M = parts.find(p=>p.type==='month').value;
-  const D = parts.find(p=>p.type==='day').value;
-  return new Date(`${y}-${M}-${D}T${pad(h)}:${pad(m)}:00+07:00`);
+    const [h, m] = hm.split(':').map(Number);
+    const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: TZ,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).formatToParts(base);
+    const y = parts.find(p => p.type === 'year').value;
+    const M = parts.find(p => p.type === 'month').value;
+    const D = parts.find(p => p.type === 'day').value;
+    return new Date(`${y}-${M}-${D}T${pad(h)}:${pad(m)}:00+07:00`);
 }
-function getTodayTimes(d) { return (typeof prayerTimesData!=='undefined') ? prayerTimesData[getKey(d)] : null; }
+
+function getTodayTimes(d) {
+    return (typeof prayerTimesData !== 'undefined') ? prayerTimesData[getKey(d)] : null;
+}
+
+// Fungsi untuk mengecek apakah waktu sholat memiliki iqomah
+function hasIqomah(prayerName) {
+    // Terbit tidak memiliki iqomah
+    return !prayerName.toLowerCase().includes('terbit');
+}
+
 function buildPrayers(now) {
-  const list = [];
-  const today = getTodayTimes(now);
-  if(today){list.push(['Subuh',today.Shubuh]);list.push(['Dhuhur',today.Dzuhur]);list.push(['Ashar',today.Ashr]);list.push(['Magrib',today.Maghrib]);list.push(['Isya',today.Isya]);}
-  const tmr = getTodayTimes(new Date(now.getTime()+86400000));
-  if(tmr) list.push(['Subuh 🌙',tmr.Shubuh]);
-  return list.map(([name,hm])=>({name,hm,when:parseHM(hm,name.includes('🌙')?new Date(now.getTime()+86400000):now)}));
+    const list = [];
+    const today = getTodayTimes(now);
+    if (today) {
+        list.push(['Subuh', today.Shubuh]);
+        list.push(['Terbit', today.Terbit]); // Tambahkan Terbit
+        list.push(['Dhuhur', today.Dzuhur]);
+        list.push(['Ashar', today.Ashr]);
+        list.push(['Magrib', today.Maghrib]);
+        list.push(['Isya', today.Isya]);
+    }
+    const tmr = getTodayTimes(new Date(now.getTime() + 86400000));
+    if (tmr) list.push(['Subuh 🌙', tmr.Shubuh]);
+    return list.map(([name, hm]) => ({
+        name,
+        hm,
+        when: parseHM(hm, name.includes('🌙') ? new Date(now.getTime() + 86400000) : now)
+    }));
 }
-function findPrevNext(prayers,now){
-  let next=prayers.find(p=>p.when>=now);
-  if(!next) next=prayers[0];
-  const prevCandidates=prayers.filter(p=>p.when<next.when);
-  let prev=prevCandidates.length?prevCandidates[prevCandidates.length-1]:null;
-  if(!prev){const y=new Date(now.getTime()-86400000);const ylist=buildPrayers(y);if(ylist.length) prev=ylist[ylist.length-1];}
-  return {prev,next};
+
+function findPrevNext(prayers, now) {
+    let next = prayers.find(p => p.when >= now);
+    if (!next) next = prayers[0];
+    const prevCandidates = prayers.filter(p => p.when < next.when);
+    let prev = prevCandidates.length ? prevCandidates[prevCandidates.length - 1] : null;
+    if (!prev) {
+        const y = new Date(now.getTime() - 86400000);
+        const ylist = buildPrayers(y);
+        if (ylist.length) prev = ylist[ylist.length - 1];
+    }
+    return {
+        prev,
+        next
+    };
 }
 
-// Quotes
-const fallbackQuotes=["Belajar adalah cahaya hidup","Waktu adalah pedang"];
-let quotesList=(typeof quotes!=='undefined'&&Array.isArray(quotes)&&quotes.length>0)?quotes.slice():fallbackQuotes.slice();
-function showNextQuote(){if(!quotesList||quotesList.length===0)quotesList=fallbackQuotes.slice();const randomIndex=Math.floor(Math.random()*quotesList.length);document.getElementById('quote').textContent='"'+quotesList[randomIndex]+'"';}
-setInterval(showNextQuote,30000);showNextQuote();
+const fallbackQuotes = ["Belajar adalah cahaya hidup", "Waktu adalah pedang"];
+let quotesList = (typeof quotes !== 'undefined' && Array.isArray(quotes) && quotes.length > 0) ? quotes.slice() : fallbackQuotes.slice();
+let quoteIndex = Math.floor(Math.random() * quotesList.length);
 
-// Theme toggle
-const themeBtn=document.getElementById('toggleTheme');
-if(localStorage.getItem('theme')==='dark'){document.body.classList.add('dark');}
-themeBtn.addEventListener('click',()=>{document.body.classList.toggle('dark');if(document.body.classList.contains('dark')){localStorage.setItem('theme','dark');}else{localStorage.setItem('theme','light');}});
+function showNextQuote() {
+    if (!quotesList || quotesList.length === 0) quotesList = fallbackQuotes.slice();
+    const randomIndex = Math.floor(Math.random() * quotesList.length);
+    document.getElementById('quote').textContent = '"' + quotesList[randomIndex] + '"';
+}
 
-// =============================
-// NOTIFIKASI
-// =============================
-function notify(msg){
-  if(Notification.permission==="granted"){
-    new Notification("⏰ Pengingat Sholat",{body:msg,icon:"icon.png"});
+setInterval(showNextQuote, 30000);
+showNextQuote();
+
+const themeBtn = document.getElementById('toggleTheme');
+
+// baca preferensi user dari localStorage
+if (localStorage.getItem('theme') === 'dark') {
+  document.body.classList.add('dark');
+}
+
+themeBtn.addEventListener('click', () => {
+  document.body.classList.toggle('dark');
+  if (document.body.classList.contains('dark')) {
+    localStorage.setItem('theme', 'dark');
+  } else {
+    localStorage.setItem('theme', 'light');
   }
-}
-if(Notification && Notification.permission!=="granted"){Notification.requestPermission();}
-const notified=new Set();
-function checkNotifications(now,adzanTime,iqomahEnd,prayerName){
-  const diffAdzan=Math.round((adzanTime-now)/60000);
-  const diffIqomah=Math.round((iqomahEnd-now)/60000);
-  if(diffAdzan===5 && !notified.has(prayerName+"_minus5")){notify(`5 menit lagi adzan ${prayerName}`);notified.add(prayerName+"_minus5");}
-  if(diffAdzan===0 && !notified.has(prayerName+"_adzan")){notify(`Sudah masuk waktu adzan ${prayerName}`);notified.add(prayerName+"_adzan");}
-  if(diffIqomah===5 && !notified.has(prayerName+"_plus10")){notify(`Sudah 10 menit sejak adzan ${prayerName} — 5 menit lagi iqomah`);notified.add(prayerName+"_plus10");}
-}
+});
 
 // =============================
 // JADWAL SHOLAT SRAGEN
 // =============================
-function updateAll(){
-  const now=nowJakarta();
-  const prayers=buildPrayers(now).filter(p=>!isNaN(p.when));
-  if(prayers.length===0){document.getElementById('mainText').innerHTML='<strong>Jadwal tidak tersedia</strong>';return;}
-  let {prev,next}=findPrevNext(prayers,now);
-  const currentAdzan=prayers.find(p=>{const start=p.when;const end=new Date(start.getTime()+IQOMAH_MIN);return now>=start&&now<end;});
-  let upcoming=currentAdzan||next;
-  if(currentAdzan){const idx=prayers.indexOf(currentAdzan);if(idx>0){prev=prayers[idx-1];}else{const ylist=buildPrayers(new Date(now.getTime()-86400000));if(ylist.length)prev=ylist[ylist.length-1];}}
-  const adzanTime=upcoming.when;
-  const iqomahEnd=new Date(adzanTime.getTime()+IQOMAH_MIN);
-  const mainEl=document.getElementById('mainText');
-  if(now<adzanTime){const diff=adzanTime-now;const hh=Math.floor(diff/3600000);const mm=Math.floor((diff%3600000)/60000);mainEl.innerHTML=`<strong>${hh>0?hh+" Jam ":""}${mm} menit </strong><span><i>lagi adzan ${upcoming.name}</i></span>`;}
-  else if(now>=adzanTime&&now<iqomahEnd){const diff=Math.ceil((iqomahEnd-now)/60000);mainEl.innerHTML=`<strong>${diff} menit</strong><span><i> lagi iqomah ${upcoming.name}</i></span>`;}
-  else{mainEl.innerHTML='<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';}
-  checkNotifications(now,adzanTime,iqomahEnd,upcoming.name);
-  if(prev&&upcoming){
-    const intervalText=document.getElementById('intervalText');
-    const deltaMs=now-prev.when;const deltaH=Math.floor(deltaMs/3600000);const deltaM=Math.floor((deltaMs%3600000)/60000);
-    let tahajudInfo='';const besok=new Date(now.getTime()+86400000);const prayersBesok=buildPrayers(besok);const nextSubuhBesok=prayersBesok.find(p=>p.name.toLowerCase().includes('subuh'));
-    if(nextSubuhBesok){const tahajudTime=new Date(nextSubuhBesok.when);tahajudTime.setHours(4,0,0,0);const diffTahajud=Math.round((nextSubuhBesok.when-tahajudTime)/60000);tahajudInfo=` ⏳ <strong>Tahajud</strong> ${diffTahajud} menit (Subuh ${nextSubuhBesok.hm})`;}
-    intervalText.innerHTML=`🏃‍♂️‍➡️ <strong>${prev.name}</strong> lewat ${deltaH>0?deltaH+':':''}${deltaM} 🕌 <strong>${upcoming.name}</strong> ${upcoming.hm}${tahajudInfo}`;
-    const total=upcoming.when-prev.when;const elapsed=Math.max(0,now-prev.when);document.getElementById('intervalProgress').style.width=(elapsed/total*100).toFixed(1)+'%';
+function updateAll() {
+    const now = nowJakarta();
+    const prayers = buildPrayers(now).filter(p => !isNaN(p.when));
+    if (prayers.length === 0) {
+        document.getElementById('mainText').innerHTML = '<strong>Jadwal tidak tersedia</strong>';
+        return;
+    }
+
+    // default prev/next
+    let { prev, next } = findPrevNext(prayers, now);
+
+    // cek apakah kita sedang dalam waktu iqomah (hanya untuk sholat yang memiliki iqomah)
+    const currentAdzan = prayers.find(p => {
+        if (!hasIqomah(p.name)) return false; // Lewatkan jika tidak ada iqomah
+        const start = p.when;
+        const end = new Date(start.getTime() + IQOMAH_MIN);
+        return now >= start && now < end;
+    });
+
+    // kalau sedang iqomah, gunakan currentAdzan sbg next sementara
+    let upcoming = currentAdzan || next;
+
+    // kalau pakai currentAdzan, prev harus prayer sebelumnya
+    if (currentAdzan) {
+        const idx = prayers.indexOf(currentAdzan);
+        if (idx > 0) {
+            prev = prayers[idx - 1];
+        } else {
+            // fallback ke sholat terakhir kemarin
+            const ylist = buildPrayers(new Date(now.getTime() - 86400000));
+            if (ylist.length) prev = ylist[ylist.length - 1];
+        }
+    }
+
+    const adzanTime = upcoming.when;
+    // Hanya tambahkan iqomah jika waktu sholat memiliki iqomah
+    const iqomahEnd = hasIqomah(upcoming.name) ? new Date(adzanTime.getTime() + IQOMAH_MIN) : adzanTime;
+    const mainEl = document.getElementById('mainText');
+
+    if (now < adzanTime) {
+        // sebelum adzan
+        const diff = adzanTime - now;
+        const hh = Math.floor(diff / 3600000);
+        const mm = Math.floor((diff % 3600000) / 60000);
+        mainEl.innerHTML = `<strong>${hh > 0 ? hh + " Jam " : ""}${mm} menit </strong><span><i>lagi adzan ${upcoming.name}</i></span>`;
+    } else if (now >= adzanTime && now < iqomahEnd && hasIqomah(upcoming.name)) {
+        // dalam waktu iqomah (hanya untuk sholat yang memiliki iqomah)
+        const diff = Math.ceil((iqomahEnd - now) / 60000);
+        mainEl.innerHTML = `<strong>${diff} menit</strong><span><i> lagi iqomah ${upcoming.name}</i></span>`;
+    } else {
+        // lewat iqomah
+        mainEl.innerHTML = '<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';
+    }
+
+    // interval progress
+    if (prev && upcoming) {
+        const intervalText = document.getElementById('intervalText');
+        const deltaMs = now - prev.when;
+        const deltaH = Math.floor(deltaMs / 3600000);
+        const deltaM = Math.floor((deltaMs % 3600000) / 60000);
+
+        // ✨ Tambah info Tahajud
+        let tahajudInfo = '';
+        const besok = new Date(now.getTime() + 86400000);
+        const prayersBesok = buildPrayers(besok);
+        const nextSubuhBesok = prayersBesok.find(p => p.name.toLowerCase().includes('subuh'));
+        if (nextSubuhBesok) {
+            const tahajudTime = new Date(nextSubuhBesok.when);
+            tahajudTime.setHours(4, 0, 0, 0); // jam 04:00 besok
+            const diffTahajud = Math.round((nextSubuhBesok.when - tahajudTime) / 60000);
+            tahajudInfo = ` ⏳ <strong>Tahajud</strong> ${diffTahajud} menit (Subuh ${nextSubuhBesok.hm})`;
+        }
+
+        intervalText.innerHTML =
+            `🏃‍♂️‍➡️ <strong>${prev.name}</strong> lewat ${deltaH > 0 ? deltaH + ':' : ''}${deltaM} 🕌 <strong>${upcoming.name}</strong> ${upcoming.hm}${tahajudInfo}`;
+
+        const total = upcoming.when - prev.when;
+        const elapsed = Math.max(0, now - prev.when);
+        document.getElementById('intervalProgress').style.width = (elapsed / total * 100).toFixed(1) + '%';
+    }
+}
+
+
+// =============================
+// BATTERY INFO (lengkap)
+// =============================
+function initBattery() {
+  const el = document.querySelector('.battery');
+  if (!navigator.getBattery) {
+    el.textContent = "-";
+    return;
   }
+  navigator.getBattery().then(function(battery) {
+    function updateBattery() {
+      let level = Math.round(battery.level * 100);
+      let charging = battery.charging ? "Charging" : "Not Charging";
+      let time = "";
+      if (battery.charging && battery.chargingTime !== Infinity) {
+        let h = Math.floor(battery.chargingTime / 3600);
+        let m = Math.floor((battery.chargingTime % 3600) / 60);
+        time = `Baterai Full: ${h} jam ${m} menit`;
+      } else if (!battery.charging && battery.dischargingTime !== Infinity) {
+        let h = Math.floor(battery.dischargingTime / 3600);
+        let m = Math.floor((battery.dischargingTime % 3600) / 60);
+        time = ` ${h} jam ${m} menit`;
+      }
+      el.innerHTML = `
+        <div>🔋 ${level}% ⚡ ${charging} ⏳ ${time}</div>
+      `;
+    }
+    updateBattery();
+    battery.addEventListener('levelchange', updateBattery);
+    battery.addEventListener('chargingchange', updateBattery);
+    battery.addEventListener('chargingtimechange', updateBattery);
+    battery.addEventListener('dischargingtimechange', updateBattery);
+  });
 }
 
 // =============================
-// Battery / Internet / IP (as before)
+// INTERNET INFO (lengkap)
 // =============================
-function initBattery(){const el=document.querySelector('.battery');if(!navigator.getBattery){el.textContent="-";return;}navigator.getBattery().then(function(battery){function updateBattery(){let level=Math.round(battery.level*100);let charging=battery.charging?"Charging":"Not Charging";let time="";if(battery.charging&&battery.chargingTime!==Infinity){let h=Math.floor(battery.chargingTime/3600);let m=Math.floor((battery.chargingTime%3600)/60);time=`Baterai Full: ${h} jam ${m} menit`;}else if(!battery.charging&&battery.dischargingTime!==Infinity){let h=Math.floor(battery.dischargingTime/3600);let m=Math.floor((battery.dischargingTime%3600)/60);time=` ${h} jam ${m} menit`;}el.innerHTML=`<div>🔋 ${level}% ⚡ ${charging} ⏳ ${time}</div>`;}updateBattery();battery.addEventListener('levelchange',updateBattery);battery.addEventListener('chargingchange',updateBattery);battery.addEventListener('chargingtimechange',updateBattery);battery.addEventListener('dischargingtimechange',updateBattery);});}
-function initInternetInfo(){const speedEl=document.querySelector('.internet-speed');if(!speedEl)return;function updateInfo(){const conn=navigator.connection||navigator.mozConnection||navigator.webkitConnection;let downlink=conn?`${conn.downlink} Mbps`:"-";let connInfo=conn?`${conn.effectiveType.toUpperCase()} • 🔴 ${conn.rtt} ms • ${conn.saveData?'🍃 Mode Hemat':'♻️ Disable'}`:"-";speedEl.innerHTML=`<div>🚀 ${downlink} • 🌐 ${connInfo}  • ${navigator.onLine?'🛜 Online':'🚫 Not Online'}</div>`;}updateInfo();window.addEventListener('online',updateInfo);window.addEventListener('offline',updateInfo);if(navigator.connection)navigator.connection.addEventListener('change',updateInfo);}
-async function initIP(){const el=document.querySelector('.ip-info');try{const res=await fetch("https://api.ipify.org?format=json");const data=await res.json();el.innerHTML=`🌎 IP: ${data.ip}`;}catch(err){el.innerHTML="🌎 IP: Error";}}
+function initInternetInfo() {
+  const speedEl = document.querySelector('.internet-speed');
+  if (!speedEl) return;
 
-// Init
-window.addEventListener('load',()=>{initBattery();initInternetInfo();initIP();});
-updateAll();setInterval(updateAll,1000);
+  function updateInfo() {
+    const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
+    let downlink = conn ? `${conn.downlink} Mbps` : "-";
+    let connInfo = conn ? 
+      `${conn.effectiveType.toUpperCase()} • 🔴 ${conn.rtt} ms • ${conn.saveData ? '🍃 Mode Hemat' : '♻️ Disable'}` 
+      : "-";
+
+    speedEl.innerHTML = `
+      <div>🚀 ${downlink} • 🌐 ${connInfo}  • ${navigator.onLine ? '🛜 Online' : '🚫 Not Online'}</div>
+    `;
+  }
+
+  updateInfo();
+  window.addEventListener('online', updateInfo);
+  window.addEventListener('offline', updateInfo);
+  if (navigator.connection) navigator.connection.addEventListener('change', updateInfo);
+}
+
+
+
+
+
+    // =============================
+    // IP INFO
+    // =============================
+    async function initIP() {
+      const el = document.querySelector('.ip-info');
+      try {
+        const res = await fetch("https://api.ipify.org?format=json");
+        const data = await res.json();
+        el.innerHTML = `🌎 IP: ${data.ip}`;
+      } catch (err) {
+        el.innerHTML = "🌎 IP: Error";
+      }
+    }
+
+
+
+    // =============================
+    // INIT
+    // =============================
+    window.addEventListener('load', () => {
+      initBattery();
+      initInternetInfo();
+      initIP();
+    });
+
+updateAll();
+setInterval(updateAll, 1000);
+
+
   </script>
+  
+  
 </body>
 </html>
