@@ -16,7 +16,7 @@
     #intervalText{font-size:26px;color:#fff;margin-bottom:20px}
    .progress {
   width: 100%;
-  max-width: 600px;
+  max-width: 80vw;
   height: 30px;
   background: rgba(255,255,255,0.1);
   border-radius: 999px;
@@ -136,7 +136,6 @@ body.dark #quote {
     <div class="progress"><i id="intervalProgress"></i></div>
     
     <span><div class="status-bar" style="color:gray;margin-top:0px;margin-bottom:30px;font-size: 12px;">
-  <span class="battery">🔋 ...</span>
   <span class="internet-speed">🌐 ...</span>
     
 </div></span>
@@ -370,11 +369,11 @@ function updateAll() {
             const tahajudTime = new Date(nextSubuhBesok.when);
             tahajudTime.setHours(4, 0, 0, 0); // jam 04:00 besok
             const diffTahajud = Math.round((nextSubuhBesok.when - tahajudTime) / 60000);
-            tahajudInfo = ` ⏳ <strong>Tahajud</strong> ${diffTahajud} menit (Subuh ${nextSubuhBesok.hm})`;
+            tahajudInfo = ` • ⏳ <strong>Tahajud</strong> ${diffTahajud} menit (Subuh Besuk ${nextSubuhBesok.hm})`;
         }
 
         intervalText.innerHTML =
-            `🏃‍♂️‍➡️ <strong>${prev.name}</strong> lewat ${deltaH > 0 ? deltaH + ':' : ''}${deltaM} 🕌 <strong>${upcoming.name}</strong> ${upcoming.hm}${tahajudInfo}`;
+            `⏱️ <strong>${prev.name}</strong> lewat ${deltaH > 0 ? deltaH + ':' : ''}${deltaM} • 🕌 <strong>${upcoming.name}</strong> ${upcoming.hm}${tahajudInfo}`;
 
         // Update progress bar berdasarkan detik jam saat ini
         updateProgressBarBySeconds();
@@ -438,11 +437,11 @@ function initInternetInfo() {
     const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
     let downlink = conn ? `${conn.downlink} Mbps` : "-";
     let connInfo = conn ? 
-      `${conn.effectiveType.toUpperCase()} • 🔴 ${conn.rtt} ms • ${conn.saveData ? '🍃 Mode Hemat' : '♻️ Disable'}` 
+      `${conn.effectiveType.toUpperCase()} • 🔴 ${conn.rtt} ms ` 
       : "-";
 
     speedEl.innerHTML = `
-      <div>🚀 ${downlink} • 🌐 ${connInfo}  • ${navigator.onLine ? '🛜 Online' : '🚫 Not Online'}</div>
+      <div>🚀 ${downlink} • 🌐 ${connInfo}  </div>
     `;
   }
 
