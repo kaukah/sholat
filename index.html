@@ -642,6 +642,14 @@ function initInternetInfo() {
         const x = padding.left + (todayIndex / (data.length - 1)) * graphWidth;
         const y = padding.top + graphHeight - ((todayData.minutes - minMinutes) / (maxMinutes - minMinutes)) * graphHeight;
         
+        // Gambar garis vertikal tebal dari bawah sampai atas
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.lineWidth = 2; // Lebih tebal
+        ctx.moveTo(x, padding.top + graphHeight); // Dari bawah grafik
+        ctx.lineTo(x, padding.top); // Sampai atas grafik
+        ctx.stroke();
+        
         // Gambar titik untuk hari ini - PERBAIKAN: warna merah dan lebih besar
         ctx.beginPath();
         ctx.fillStyle = '#ff4757';
@@ -658,20 +666,11 @@ function initInternetInfo() {
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const formattedDate = `${todayData.day} ${monthNames[todayData.date.getMonth()]} ${todayData.date.getFullYear()}`;
         
-        // PERBAIKAN: Tambahkan garis vertikal dan posisi teks di atas
-        // Gambar garis vertikal dari titik ke atas
-        ctx.beginPath();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.lineWidth = 1;
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y - 25); // Garis vertikal ke atas
-        ctx.stroke();
-        
-        // Tambahkan label tanggal di atas garis
+        // Tambahkan label tanggal di atas grafik
         ctx.fillStyle = '#ffffff';
-        ctx.font = '10px sans-serif';
+        ctx.font = 'bold 10px sans-serif'; // Tebal agar lebih mudah dibaca
         ctx.textAlign = 'center';
-        ctx.fillText(formattedDate, x, y - 30); // Posisi teks di atas garis
+        ctx.fillText(formattedDate, x, padding.top - 5); // Posisi di atas grafik dengan jarak 5px
       }
       
       // Tandai titik waktu terawal - PERBAIKAN: warna biru seperti garis
@@ -696,20 +695,20 @@ function initInternetInfo() {
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const formattedDate = `${minEntry.day} ${monthNames[minEntry.date.getMonth()]} ${minEntry.date.getFullYear()}`;
         
-        // PERBAIKAN: Tambahkan garis vertikal dan posisi teks di atas
-        // Gambar garis vertikal dari titik ke atas
-        ctx.beginPath();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.lineWidth = 1;
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y - 25); // Garis vertikal ke atas
-        ctx.stroke();
-        
-        // Tambahkan label tanggal di atas garis
+        // Tambahkan label tanggal dengan posisi yang disesuaikan
         ctx.fillStyle = '#ffffff';
         ctx.font = '10px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`${formattedDate} (${minEntry.time})`, x, y - 30); // Posisi teks di atas garis
+        
+        // Cek posisi untuk menghindari tumpang tindih
+        let textY = y - 15; // Posisi default di atas titik
+        
+        // Jika terlalu dekat dengan atas grafik, pindahkan ke bawah
+        if (textY < padding.top + 15) {
+          textY = y + 15; // Posisi di bawah titik
+        }
+        
+        ctx.fillText(`${formattedDate} (${minEntry.time})`, x, textY);
       }
       
       // Tandai titik waktu terakhir - PERBAIKAN: warna biru seperti garis
@@ -734,20 +733,20 @@ function initInternetInfo() {
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const formattedDate = `${maxEntry.day} ${monthNames[maxEntry.date.getMonth()]} ${maxEntry.date.getFullYear()}`;
         
-        // PERBAIKAN: Tambahkan garis vertikal dan posisi teks di atas
-        // Gambar garis vertikal dari titik ke atas
-        ctx.beginPath();
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
-        ctx.lineWidth = 1;
-        ctx.moveTo(x, y);
-        ctx.lineTo(x, y - 25); // Garis vertikal ke atas
-        ctx.stroke();
-        
-        // Tambahkan label tanggal di atas garis
+        // Tambahkan label tanggal dengan posisi yang disesuaikan
         ctx.fillStyle = '#ffffff';
         ctx.font = '10px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`${formattedDate} (${maxEntry.time})`, x, y - 30); // Posisi teks di atas garis
+        
+        // Cek posisi untuk menghindari tumpang tindih
+        let textY = y - 15; // Posisi default di atas titik
+        
+        // Jika terlalu dekat dengan atas grafik, pindahkan ke bawah
+        if (textY < padding.top + 15) {
+          textY = y + 15; // Posisi di bawah titik
+        }
+        
+        ctx.fillText(`${formattedDate} (${maxEntry.time})`, x, textY);
       }
       
       // Gambar sumbu Y (waktu) - disesuaikan dengan rentang waktu sholat
