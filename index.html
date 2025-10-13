@@ -16,7 +16,7 @@
     #intervalText{font-size:26px;color:#fff;margin-bottom:20px}
    .progress {
   width: 100%;
-  max-width: 80vw;
+  max-width: 600px;
   height: 30px;
   background: rgba(255,255,255,0.1);
   border-radius: 999px;
@@ -30,56 +30,16 @@
   width: 0%;
   border-radius: inherit;
   
-  /* Gabungkan gradasi utama dengan pola arus */
-  background-image: 
-    linear-gradient(90deg, #4aa8ff, #8b5cf6), /* gradasi dasar */
-    repeating-linear-gradient(
-      -45deg,
-      rgba(255, 255, 255, 0.15),
-      rgba(255, 255, 255, 0.15) 15px,
-      transparent 15px,
-      transparent 30px
-    );
+  /* Sederhanakan background - hanya gradasi sederhana */
+  background: linear-gradient(90deg, #4aa8ff, #8b5cf6);
   
-  background-size: auto, 30px 30px;  /* gradasi penuh + pola strip */
-  background-blend-mode: overlay;    /* campur strip di atas gradasi */
-  
-  /* animasi lebar progres */
-  transition: width 1s linear; /* 1 detik untuk animasi perubahan lebar */
-
-  /* animasi arus bergerak */
-  animation: flow-animation 1s linear infinite;
+  /* animasi lebar progres - percepat untuk smart TV */
+  transition: width 0.5s linear;
 }
 
-/* Keyframes untuk geser pola strip */
-@keyframes flow-animation {
-  from {
-    background-position: 0 0, 0 0;
-  }
-  to {
-    background-position: 0 0, 30px 0;
-  }
-}
-
-/* Tambahkan keyframes untuk pulse */
-@keyframes pulse {
-  0% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.2); opacity: 0.7; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-/* Tambahkan kelas untuk efek rush */
+/* Tambahkan kelas untuk efek rush - sederhanakan */
 .progress.rush > i {
-  animation-duration: 0.5s, 1s; /* percepat animasi */
-  background-image: 
-    linear-gradient(90deg, #ff6b6b, #ff9e40), /* gradasi lebih mencolok */
-    repeating-linear-gradient(
-      -45deg,
-      rgba(255, 255, 255, 0.3),
-      rgba(255, 255, 255, 0.3) 15px,
-      transparent 15px,
-      transparent 30px
-    );
+  background: linear-gradient(90deg, #ff6b6b, #ff9e40);
 }
     #quote{margin-top:-20px;font-size:32px;color:#adadad;max-width:900wh;white-space:pre-line;margin-left:auto;margin-right:auto}
     
@@ -145,19 +105,6 @@ body.dark #quote {
   flex: 1;
 }
 
-/* Style untuk tanggal tooltip */
-.date-tooltip {
-  position: absolute;
-  background: rgba(0, 0, 0, 0.8);
-  color: white;
-  padding: 5px 10px;
-  border-radius: 4px;
-  font-size: 12px;
-  pointer-events: none;
-  z-index: 100;
-  white-space: nowrap;
-}
-
 /* Style untuk legend grafik */
 .chart-legend {
   position: absolute;
@@ -189,6 +136,7 @@ body.dark #quote {
     <div class="progress"><i id="intervalProgress"></i></div>
     
     <span><div class="status-bar" style="color:gray;margin-top:0px;margin-bottom:30px;font-size: 12px;">
+  <span class="battery">🔋 ...</span>
   <span class="internet-speed">🌐 ...</span>
     
 </div></span>
@@ -219,7 +167,6 @@ body.dark #quote {
       <span class="month-label">NOV</span>
       <span class="month-label">DES</span>
     </div>
-    <div class="date-tooltip" id="dateTooltip"></div>
   </div>
 
   <script>
@@ -330,7 +277,7 @@ themeBtn.addEventListener('click', () => {
 });
 
 // =============================
-// PROGRESS BAR - PERBAIKAN TOTAL
+// PROGRESS BAR - VERSI RINGAN UNTUK SMART TV
 // =============================
 // Fungsi untuk update progress bar berdasarkan detik jam saat ini
 function updateProgressBarBySeconds() {
@@ -440,7 +387,7 @@ function updateAll() {
           progressBar.classList.remove('rush');
         }
         
-        // Update grafik untuk sholat berikutnya (PERBAIKAN: gunakan upcoming.name langsung)
+        // Update grafik untuk sholat berikutnya
         updateChartForNextPrayer(upcoming.name);
     }
 }
@@ -520,7 +467,7 @@ function initInternetInfo() {
     }
 
     // =============================
-    // GRAFIK JADWAL SHOLAT
+    // GRAFIK JADWAL SHOLAT - VERSI RINGAN UNTUK SMART TV
     // =============================
     // Fungsi untuk mengumpulkan data jadwal sholat selama setahun
     function collectYearPrayerData(prayerName) {
@@ -540,12 +487,15 @@ function initInternetInfo() {
           
           if (times) {
             let prayerTime;
+            
+            // PERBAIKAN: Tambahkan penanganan untuk "Terbit"
             switch(prayerName) {
               case 'Subuh': prayerTime = times.Shubuh; break;
               case 'Dhuhur': prayerTime = times.Dzuhur; break;
               case 'Ashar': prayerTime = times.Ashr; break;
               case 'Magrib': prayerTime = times.Maghrib; break;
               case 'Isya': prayerTime = times.Isya; break;
+              case 'Terbit': prayerTime = times.Terbit; break; // TAMBAHKAN INI
             }
             
             if (prayerTime) {
@@ -567,7 +517,7 @@ function initInternetInfo() {
       return data;
     }
 
-    // Fungsi untuk membuat grafik yang lebih indah
+    // Fungsi untuk membuat grafik yang lebih ringan untuk smart TV
     function createChart(data, prayerName) {
       const chartEl = document.getElementById('chart');
       chartEl.innerHTML = '';
@@ -604,29 +554,29 @@ function initInternetInfo() {
       const minEntry = data.find(d => d.minutes === minMinutes);
       const maxEntry = data.find(d => d.minutes === maxMinutes);
       
-      // Buat gradien untuk area di bawah kurva
+      // Sederhanakan gradien untuk performa lebih baik
       const gradient = ctx.createLinearGradient(0, padding.top, 0, padding.top + graphHeight);
-      gradient.addColorStop(0, 'rgba(74, 168, 255, 0.6)');
-      gradient.addColorStop(1, 'rgba(74, 168, 255, 0.1)');
+      gradient.addColorStop(0, 'rgba(74, 168, 255, 0.4)');
+      gradient.addColorStop(1, 'rgba(74, 168, 255, 0.05)');
       
       // Bersihkan canvas
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      // Gambar grid lines untuk pemisah bulan
+      // Gambar grid lines untuk pemisah bulan - kurangi frekuensi untuk performa
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
       ctx.lineWidth = 1;
       
-      // Gambar garis horizontal
-      for (let i = 0; i <= 4; i++) {
-        const y = padding.top + (i / 4) * graphHeight;
+      // Gambar garis horizontal - hanya 3 garis untuk mengurangi beban
+      for (let i = 0; i <= 2; i++) {
+        const y = padding.top + (i / 2) * graphHeight;
         ctx.beginPath();
         ctx.moveTo(padding.left, y);
         ctx.lineTo(padding.left + graphWidth, y);
         ctx.stroke();
       }
       
-      // Gambar garis vertikal (pemisah bulan)
-      for (let i = 1; i < 12; i++) {
+      // Gambar garis vertikal (pemisah bulan) - hanya 6 garis untuk mengurangi beban
+      for (let i = 1; i < 12; i += 2) {
         const x = padding.left + (i / 12) * graphWidth;
         ctx.beginPath();
         ctx.moveTo(x, padding.top);
@@ -634,19 +584,26 @@ function initInternetInfo() {
         ctx.stroke();
       }
       
-      // Gambar area di bawah kurva
-      ctx.beginPath();
-      ctx.moveTo(padding.left, padding.top + graphHeight);
-      
-      // Gambar kurva
+      // Gambar kurva dengan lebih sedikit titik untuk performa lebih baik
       ctx.beginPath();
       ctx.strokeStyle = '#4aa8ff';
       ctx.lineWidth = 3;
       ctx.lineJoin = 'round';
       
-      for (let i = 0; i < data.length; i++) {
-        const x = padding.left + (i / (data.length - 1)) * graphWidth;
-        const y = padding.top + graphHeight - ((data[i].minutes - minMinutes) / (maxMinutes - minMinutes)) * graphHeight;
+      // Ambil sampel data setiap 3 hari untuk mengurangi jumlah titik
+      const sampledData = [];
+      for (let i = 0; i < data.length; i += 3) {
+        sampledData.push(data[i]);
+      }
+      // Pastikan data terakhir masuk
+      if (data.length > 0 && !sampledData.includes(data[data.length - 1])) {
+        sampledData.push(data[data.length - 1]);
+      }
+      
+      for (let i = 0; i < sampledData.length; i++) {
+        const dataIndex = data.indexOf(sampledData[i]);
+        const x = padding.left + (dataIndex / (data.length - 1)) * graphWidth;
+        const y = padding.top + graphHeight - ((sampledData[i].minutes - minMinutes) / (maxMinutes - minMinutes)) * graphHeight;
         
         if (i === 0) {
           ctx.moveTo(x, y);
@@ -656,31 +613,24 @@ function initInternetInfo() {
       }
       ctx.stroke();
       
-      // Gambar area di bawah kurva
+      // Gambar area di bawah kurva dengan data yang sama
+      ctx.beginPath();
+      ctx.moveTo(padding.left, padding.top + graphHeight);
+      
+      for (let i = 0; i < sampledData.length; i++) {
+        const dataIndex = data.indexOf(sampledData[i]);
+        const x = padding.left + (dataIndex / (data.length - 1)) * graphWidth;
+        const y = padding.top + graphHeight - ((sampledData[i].minutes - minMinutes) / (maxMinutes - minMinutes)) * graphHeight;
+        
+        ctx.lineTo(x, y);
+      }
+      
       ctx.lineTo(padding.left + graphWidth, padding.top + graphHeight);
-      ctx.lineTo(padding.left, padding.top + graphHeight);
       ctx.closePath();
       ctx.fillStyle = gradient;
       ctx.fill();
       
-      // Gambar kurva lagi agar di atas area
-      ctx.beginPath();
-      ctx.strokeStyle = '#4aa8ff';
-      ctx.lineWidth = 3;
-      
-      for (let i = 0; i < data.length; i++) {
-        const x = padding.left + (i / (data.length - 1)) * graphWidth;
-        const y = padding.top + graphHeight - ((data[i].minutes - minMinutes) / (maxMinutes - minMinutes)) * graphHeight;
-        
-        if (i === 0) {
-          ctx.moveTo(x, y);
-        } else {
-          ctx.lineTo(x, y);
-        }
-      }
-      ctx.stroke();
-      
-      // Tandai titik tanggal saat ini
+      // Tandai titik tanggal saat ini - PERBAIKAN: warna merah dan lebih besar
       const today = new Date();
       const todayData = data.find(d => 
         d.date.getDate() === today.getDate() && 
@@ -692,44 +642,47 @@ function initInternetInfo() {
         const x = padding.left + (todayIndex / (data.length - 1)) * graphWidth;
         const y = padding.top + graphHeight - ((todayData.minutes - minMinutes) / (maxMinutes - minMinutes)) * graphHeight;
         
-        // Simpan posisi titik untuk animasi
-        const currentPoint = { x, y, radius: 6 };
-        
-        // Gambar titik untuk hari ini
+        // Gambar titik untuk hari ini - PERBAIKAN: warna merah dan lebih besar
         ctx.beginPath();
         ctx.fillStyle = '#ff4757';
-        ctx.arc(currentPoint.x, currentPoint.y, currentPoint.radius, 0, Math.PI * 2);
+        ctx.arc(x, y, 8, 0, Math.PI * 2); // PERBAIKAN: radius 8 (lebih besar)
         ctx.fill();
         
         // Gambar lingkaran putih di dalam
         ctx.beginPath();
         ctx.fillStyle = '#ffffff';
-        ctx.arc(currentPoint.x, currentPoint.y, 3, 0, Math.PI * 2);
+        ctx.arc(x, y, 4, 0, Math.PI * 2); // PERBAIKAN: radius 4 (lebih besar)
         ctx.fill();
         
         // Format tanggal: 11 Okt 2025
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const formattedDate = `${todayData.day} ${monthNames[todayData.date.getMonth()]} ${todayData.date.getFullYear()}`;
         
-        // Tambahkan label tanggal
+        // PERBAIKAN: Tambahkan garis vertikal dan posisi teks di atas
+        // Gambar garis vertikal dari titik ke atas
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y - 25); // Garis vertikal ke atas
+        ctx.stroke();
+        
+        // Tambahkan label tanggal di atas garis
         ctx.fillStyle = '#ffffff';
         ctx.font = '10px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(formattedDate, x, y - 12);
-        
-        // Animasi pulse untuk titik saat ini
-        animateCurrentPoint(ctx, currentPoint);
+        ctx.fillText(formattedDate, x, y - 30); // Posisi teks di atas garis
       }
       
-      // Tandai titik waktu terawal
+      // Tandai titik waktu terawal - PERBAIKAN: warna biru seperti garis
       if (minEntry) {
         const minIndex = data.indexOf(minEntry);
         const x = padding.left + (minIndex / (data.length - 1)) * graphWidth;
         const y = padding.top + graphHeight - ((minEntry.minutes - minMinutes) / (maxMinutes - minMinutes)) * graphHeight;
         
-        // Gambar titik untuk waktu terawal
+        // Gambar titik untuk waktu terawal - PERBAIKAN: warna biru
         ctx.beginPath();
-        ctx.fillStyle = '#2ed573';
+        ctx.fillStyle = '#4aa8ff'; // PERBAIKAN: warna biru seperti garis
         ctx.arc(x, y, 6, 0, Math.PI * 2);
         ctx.fill();
         
@@ -743,22 +696,31 @@ function initInternetInfo() {
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const formattedDate = `${minEntry.day} ${monthNames[minEntry.date.getMonth()]} ${minEntry.date.getFullYear()}`;
         
-        // Tambahkan label tanggal
+        // PERBAIKAN: Tambahkan garis vertikal dan posisi teks di atas
+        // Gambar garis vertikal dari titik ke atas
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y - 25); // Garis vertikal ke atas
+        ctx.stroke();
+        
+        // Tambahkan label tanggal di atas garis
         ctx.fillStyle = '#ffffff';
         ctx.font = '10px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`${formattedDate} (${minEntry.time})`, x, y - 12);
+        ctx.fillText(`${formattedDate} (${minEntry.time})`, x, y - 30); // Posisi teks di atas garis
       }
       
-      // Tandai titik waktu terakhir
+      // Tandai titik waktu terakhir - PERBAIKAN: warna biru seperti garis
       if (maxEntry) {
         const maxIndex = data.indexOf(maxEntry);
         const x = padding.left + (maxIndex / (data.length - 1)) * graphWidth;
         const y = padding.top + graphHeight - ((maxEntry.minutes - minMinutes) / (maxMinutes - minMinutes)) * graphHeight;
         
-        // Gambar titik untuk waktu terakhir
+        // Gambar titik untuk waktu terakhir - PERBAIKAN: warna biru
         ctx.beginPath();
-        ctx.fillStyle = '#ffa502';
+        ctx.fillStyle = '#4aa8ff'; // PERBAIKAN: warna biru seperti garis
         ctx.arc(x, y, 6, 0, Math.PI * 2);
         ctx.fill();
         
@@ -772,11 +734,20 @@ function initInternetInfo() {
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const formattedDate = `${maxEntry.day} ${monthNames[maxEntry.date.getMonth()]} ${maxEntry.date.getFullYear()}`;
         
-        // Tambahkan label tanggal
+        // PERBAIKAN: Tambahkan garis vertikal dan posisi teks di atas
+        // Gambar garis vertikal dari titik ke atas
+        ctx.beginPath();
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+        ctx.lineWidth = 1;
+        ctx.moveTo(x, y);
+        ctx.lineTo(x, y - 25); // Garis vertikal ke atas
+        ctx.stroke();
+        
+        // Tambahkan label tanggal di atas garis
         ctx.fillStyle = '#ffffff';
         ctx.font = '10px sans-serif';
         ctx.textAlign = 'center';
-        ctx.fillText(`${formattedDate} (${maxEntry.time})`, x, y - 12);
+        ctx.fillText(`${formattedDate} (${maxEntry.time})`, x, y - 30); // Posisi teks di atas garis
       }
       
       // Gambar sumbu Y (waktu) - disesuaikan dengan rentang waktu sholat
@@ -795,76 +766,12 @@ function initInternetInfo() {
         const y = padding.top + (i / 4) * graphHeight;
         ctx.fillText(timeStr, padding.left - 5, y);
       }
-      
-      // HAPUS JUDUL GRAFIK
-      // ctx.fillStyle = '#ffffff';
-      // ctx.font = 'bold 14px sans-serif';
-      // ctx.textAlign = 'center';
-      // ctx.fillText(`Grafik Jadwal ${prayerName} - Tahun ${new Date().getFullYear()}`, canvas.width / 2, 20);
     }
 
-    // Fungsi untuk animasi pulse pada titik saat ini - PERBAIKAN
-    function animateCurrentPoint(ctx, point) {
-      let radius = point.radius;
-      let growing = true;
-      let opacity = 0.7;
-      
-      // Buat canvas terpisah untuk animasi pulse
-      const pulseCanvas = document.createElement('canvas');
-      pulseCanvas.width = (point.radius + 10) * 2;
-      pulseCanvas.height = (point.radius + 10) * 2;
-      pulseCanvas.style.position = 'absolute';
-      pulseCanvas.style.left = (point.x - point.radius - 10) + 'px';
-      pulseCanvas.style.top = (point.y - point.radius - 10) + 'px';
-      pulseCanvas.style.pointerEvents = 'none';
-      pulseCanvas.style.zIndex = '10';
-      
-      // Tambahkan canvas ke chart container
-      document.getElementById('chart').appendChild(pulseCanvas);
-      
-      const pulseCtx = pulseCanvas.getContext('2d');
-      
-      function drawPulse() {
-        // Bersihkan canvas
-        pulseCtx.clearRect(0, 0, pulseCanvas.width, pulseCanvas.height);
-        
-        // Gambar efek pulse
-        pulseCtx.beginPath();
-        pulseCtx.arc(point.radius + 10, point.radius + 10, radius, 0, Math.PI * 2);
-        pulseCtx.strokeStyle = `rgba(255, 71, 87, ${opacity})`;
-        pulseCtx.lineWidth = 2;
-        pulseCtx.stroke();
-        
-        // Update animasi
-        if (growing) {
-          radius += 0.2;
-          opacity -= 0.01;
-          if (radius > point.radius + 5) {
-            growing = false;
-          }
-        } else {
-          radius -= 0.2;
-          opacity += 0.01;
-          if (radius <= point.radius) {
-            growing = true;
-          }
-        }
-        
-        // Lanjutkan animasi
-        requestAnimationFrame(drawPulse);
-      }
-      
-      // Mulai animasi
-      drawPulse();
-    }
-
-    // Fungsi untuk update grafik berdasarkan sholat berikutnya (PERBAIKAN)
+    // Fungsi untuk update grafik berdasarkan sholat berikutnya
     function updateChartForNextPrayer(currentPrayer) {
       // Hapus "🌙" jika ada
       const cleanPrayer = currentPrayer.replace(' 🌙', '');
-      
-      // PERBAIKAN: Langsung gunakan cleanPrayer sebagai sholat yang akan ditampilkan di grafik
-      // Jangan gunakan getNextPrayer lagi
       
       // Kumpulkan data untuk sholat ini
       const data = collectYearPrayerData(cleanPrayer);
@@ -900,8 +807,8 @@ function initInternetInfo() {
 updateAll();
 setInterval(updateAll, 1000); // Update setiap detik untuk menampilkan waktu yang akurat
 
-// Tambahkan interval khusus untuk update progress bar setiap 100ms
-setInterval(updateProgressBarBySeconds, 100);
+// Kurangi frekuensi update progress bar untuk mengurangi beban
+setInterval(updateProgressBarBySeconds, 200); // Update setiap 200ms bukan 100ms
 
   </script>
 </body>
