@@ -15,8 +15,7 @@
     #mainText span{color:#FFAA00;font-weight:400}
     #intervalText{font-size:26px;color:#fff;margin-bottom:20px}
    .progress {
-  width: 100%;
-  max-width: 80vw;
+  width: 80vw; /* PERBAIKAN: 80vw dari lebar layar */
   height: 30px;
   background: rgba(255,255,255,0.1);
   border-radius: 999px;
@@ -126,6 +125,43 @@ body.dark #quote {
   height: 10px;
   border-radius: 50%;
 }
+
+/* PERBAIKAN: Tambahkan style untuk jam di tengah halaman */
+#center-clock {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 16px;
+  font-weight: bold;
+  color: #fff;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#center-clock .time-icon {
+  color: #FFAA00;
+}
+
+#center-clock .date-icon {
+  color: #4aa8ff;
+}
+
+/* PERBAIKAN: Style untuk tombol toggle di pojok kanan atas */
+#toggleTheme {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: none;
+  border: 1px solid #666;
+  border-radius: 8px;
+  padding: 6px 12px;
+  cursor: pointer;
+  color: inherit;
+  z-index: 101;
+}
   </style>
 </head>
 <body class="dark">
@@ -140,12 +176,16 @@ body.dark #quote {
     
 </div></span>
     
-<button id="toggleTheme" style="
-  position:absolute;top:10px;right:10px;
-  background:none;border:1px solid #666;
-  border-radius:8px;padding:6px 12px;
-  cursor:pointer;color:inherit;
-">🌓</button>
+    <!-- PERBAIKAN: Tambahkan jam di tengah halaman -->
+    <div id="center-clock">
+      <span class="time-icon">🕒</span>
+      <span id="center-time">--:--</span>
+      <span class="date-icon">📅</span>
+      <span id="center-date">--- ---- ----</span>
+    </div>
+    
+    <!-- PERBAIKAN: Tombol toggle di pojok kanan atas -->
+    <button id="toggleTheme">🌓</button>
   </main>
   
   <!-- Grafik Jadwal Sholat -->
@@ -261,19 +301,23 @@ showNextQuote();
 
 const themeBtn = document.getElementById('toggleTheme');
 
-// baca preferensi user dari localStorage
-if (localStorage.getItem('theme') === 'dark') {
-  document.body.classList.add('dark');
-}
-
-themeBtn.addEventListener('click', () => {
+// PERBAIKAN: Perbaiki fungsi toggle theme
+function toggleTheme() {
   document.body.classList.toggle('dark');
   if (document.body.classList.contains('dark')) {
     localStorage.setItem('theme', 'dark');
   } else {
     localStorage.setItem('theme', 'light');
   }
-});
+}
+
+// baca preferensi user dari localStorage
+if (localStorage.getItem('theme') === 'dark') {
+  document.body.classList.add('dark');
+}
+
+// PERBAIKAN: Ganti event listener
+themeBtn.addEventListener('click', toggleTheme);
 
 // =============================
 // PROGRESS BAR - VERSI RINGAN UNTUK SMART TV
@@ -289,6 +333,28 @@ function updateProgressBarBySeconds() {
     
     // Update progress bar
     document.getElementById('intervalProgress').style.width = progress.toFixed(1) + '%';
+}
+
+// =============================
+// JAM - PERBAIKAN: Tambahkan fungsi untuk jam
+// =============================
+function updateClock() {
+  const now = new Date();
+  
+  // Format untuk tengah halaman (12 jam AM/PM tanpa detik)
+  let hours12 = now.getHours();
+  const ampm = hours12 >= 12 ? 'PM' : 'AM';
+  hours12 = hours12 % 12;
+  hours12 = hours12 ? hours12 : 12; // 0 harus diubah menjadi 12
+  const minutes12 = pad(now.getMinutes());
+  document.getElementById('center-time').textContent = `${hours12}:${minutes12} ${ampm}`;
+  
+  // Format tanggal
+  const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGU', 'SEP', 'OKT', 'NOV', 'DES'];
+  const day = now.getDate();
+  const month = monthNames[now.getMonth()];
+  const year = now.getFullYear();
+  document.getElementById('center-date').textContent = `${day} ${month} ${year}`;
 }
 
 // =============================
@@ -369,7 +435,7 @@ function updateAll() {
             const tahajudTime = new Date(nextSubuhBesok.when);
             tahajudTime.setHours(4, 0, 0, 0); // jam 04:00 besok
             const diffTahajud = Math.round((nextSubuhBesok.when - tahajudTime) / 60000);
-            tahajudInfo = ` • ⏳ <strong>Tahajud</strong> ${diffTahajud} menit (Subuh Besuk ${nextSubuhBesok.hm})`;
+            tahajudInfo = ` • ⏳ <strong>Tahajud</strong> ${diffTahajud} menit (Subuh Besok ${nextSubuhBesok.hm})`;
         }
 
         intervalText.innerHTML =
@@ -661,15 +727,21 @@ function initInternetInfo() {
         ctx.arc(x, y, 4, 0, Math.PI * 2); // PERBAIKAN: radius 4 (lebih besar)
         ctx.fill();
         
-        // Format tanggal: 11 Okt 2025
+        // Format tanggal dengan jam: 11 Okt 2025 05:30
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const formattedDate = `${todayData.day} ${monthNames[todayData.date.getMonth()]} ${todayData.date.getFullYear()}`;
         
-        // Tambahkan label tanggal di atas grafik
+        // Format jam untuk tanggal saat ini
+        const [hours, minutes] = todayData.time.split(':').map(Number);
+        const hours12 = hours % 12 || 12;
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const formattedTime = `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        
+        // Tambahkan label tanggal di atas grafik dengan jam
         ctx.fillStyle = '#ffffff';
-        ctx.font = 'bold 10px sans-serif'; // Tebal agar lebih mudah dibaca
+        ctx.font = 'bold 18px sans-serif'; // Ukuran font untuk teks terkini
         ctx.textAlign = 'center';
-        ctx.fillText(formattedDate, x, padding.top - 5); // Posisi di atas grafik dengan jarak 5px
+        ctx.fillText(`${formattedDate} ${formattedTime}`, x, padding.top - 5); // Posisi di atas grafik dengan jarak 5px
       }
       
       // Tandai titik waktu terawal - PERBAIKAN: warna biru seperti garis
@@ -690,13 +762,19 @@ function initInternetInfo() {
         ctx.arc(x, y, 3, 0, Math.PI * 2);
         ctx.fill();
         
-        // Format tanggal
+        // Format tanggal dengan jam
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const formattedDate = `${minEntry.day} ${monthNames[minEntry.date.getMonth()]} ${minEntry.date.getFullYear()}`;
         
+        // Format jam untuk waktu terawal
+        const [hours, minutes] = minEntry.time.split(':').map(Number);
+        const hours12 = hours % 12 || 12;
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const formattedTime = `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        
         // Tambahkan label tanggal dengan posisi yang disesuaikan
         ctx.fillStyle = '#ffffff';
-        ctx.font = '10px sans-serif';
+        ctx.font = 'bold 18px sans-serif'; // PERBAIKAN: Samakan dengan teks terkini
         ctx.textAlign = 'center';
         
         // Cek posisi untuk menghindari tumpang tindih
@@ -707,7 +785,7 @@ function initInternetInfo() {
           textY = y + 15; // Posisi di bawah titik
         }
         
-        ctx.fillText(`${formattedDate} (${minEntry.time})`, x, textY);
+        ctx.fillText(`${formattedDate} ${formattedTime}`, x, textY);
       }
       
       // Tandai titik waktu terakhir - PERBAIKAN: warna biru seperti garis
@@ -728,13 +806,19 @@ function initInternetInfo() {
         ctx.arc(x, y, 3, 0, Math.PI * 2);
         ctx.fill();
         
-        // Format tanggal
+        // Format tanggal dengan jam
         const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
         const formattedDate = `${maxEntry.day} ${monthNames[maxEntry.date.getMonth()]} ${maxEntry.date.getFullYear()}`;
         
+        // Format jam untuk waktu terakhir
+        const [hours, minutes] = maxEntry.time.split(':').map(Number);
+        const hours12 = hours % 12 || 12;
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const formattedTime = `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+        
         // Tambahkan label tanggal dengan posisi yang disesuaikan
         ctx.fillStyle = '#ffffff';
-        ctx.font = '10px sans-serif';
+        ctx.font = 'bold 18px sans-serif'; // PERBAIKAN: Samakan dengan teks terkini
         ctx.textAlign = 'center';
         
         // Cek posisi untuk menghindari tumpang tindih
@@ -745,12 +829,12 @@ function initInternetInfo() {
           textY = y + 15; // Posisi di bawah titik
         }
         
-        ctx.fillText(`${formattedDate} (${maxEntry.time})`, x, textY);
+        ctx.fillText(`${formattedDate} ${formattedTime}`, x, textY);
       }
       
       // Gambar sumbu Y (waktu) - disesuaikan dengan rentang waktu sholat
       ctx.fillStyle = '#cccccc';
-      ctx.font = '10px sans-serif';
+      ctx.font = '12px sans-serif'; // PERBAIKAN: Perbesar font
       ctx.textAlign = 'right';
       ctx.textBaseline = 'middle';
       
@@ -807,6 +891,9 @@ setInterval(updateAll, 1000); // Update setiap detik untuk menampilkan waktu yan
 
 // Kurangi frekuensi update progress bar untuk mengurangi beban
 setInterval(updateProgressBarBySeconds, 200); // Update setiap 200ms bukan 100ms
+
+// PERBAIKAN: Update jam setiap detik
+setInterval(updateClock, 1000);
 
   </script>
 </body>
