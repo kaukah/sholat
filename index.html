@@ -7,7 +7,6 @@
 <script src="jadwalsholat.js"></script>
 <script src="quotes.js"></script>
 
-
 <style>
 html,body{margin:0;height:100%;font-family:system-ui,sans-serif;background:#000;color:#fff;margin-top: -50px;}
 body{display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
@@ -38,8 +37,28 @@ transition: width 0.5s linear;
 
 /* Tambahkan kelas untuk efek rush - sederhanakan */
 .progress.rush > i {
-background: linear-gradient(90deg, #ff6b6b, #ff9e40);
+background: linear-gradient(90deg, #ff0000, #ff3333); /* PERBAIKAN: Ubah ke merah */
+animation: blink 1s infinite; /* PERBAIKAN: Tambah animasi kedip */
 }
+
+/* PERBAIKAN: Tambah animasi kedip */
+@keyframes blink {
+0% { opacity: 1; }
+50% { opacity: 0.5; }
+100% { opacity: 1; }
+}
+
+/* PERBAIKAN: Tambah animasi kedip untuk angka menit */
+.blink-text {
+animation: blinkText 1s infinite;
+}
+
+@keyframes blinkText {
+0% { opacity: 1; }
+50% { opacity: 0.3; }
+100% { opacity: 1; }
+}
+
 #quote{margin-top:-20px;font-size:32px;color:#adadad;max-width:900wh;white-space:pre-line;margin-left:auto;margin-right:auto}
 
 /* Dark mode */
@@ -399,6 +418,12 @@ const adzanTime = upcoming.when;
 const iqomahEnd = hasIqomah(upcoming.name) ? new Date(adzanTime.getTime() + IQOMAH_MIN) : adzanTime;
 const mainEl = document.getElementById('mainText');
 
+// PERBAIKAN: Hapus kelas blink-text sebelum update
+const mainTextStrong = mainEl.querySelector('strong');
+if (mainTextStrong) {
+mainTextStrong.classList.remove('blink-text');
+}
+
 if (now < adzanTime) {
 // sebelum adzan
 const diff = adzanTime - now;
@@ -410,10 +435,24 @@ const prayerText = upcoming.name.toLowerCase().includes('terbit') ?
 `menuju ${upcoming.name}` : `lagi adzan ${upcoming.name}`;
 
 mainEl.innerHTML = `<strong>${hh > 0 ? hh + " Jam " : ""}${mm} menit </strong><span><i>${prayerText}</i></span>`;
+    
+    // PERBAIKAN: Tambahkan kelas blink-text jika kurang dari 15 menit dan memiliki iqomah
+    if (diff < 15 * 60 * 1000 && hasIqomah(upcoming.name)) {
+        const mainTextStrong = mainEl.querySelector('strong');
+        if (mainTextStrong) {
+            mainTextStrong.classList.add('blink-text');
+        }
+    }
 } else if (now >= adzanTime && now < iqomahEnd && hasIqomah(upcoming.name)) {
 // dalam waktu iqomah (hanya untuk sholat yang memiliki iqomah)
 const diff = Math.ceil((iqomahEnd - now) / 60000);
 mainEl.innerHTML = `<strong>${diff} menit</strong><span><i> lagi iqomah ${upcoming.name}</i></span>`;
+    
+    // PERBAIKAN: Tambahkan kelas blink-text untuk iqomah
+    const mainTextStrong = mainEl.querySelector('strong');
+    if (mainTextStrong) {
+        mainTextStrong.classList.add('blink-text');
+    }
 } else {
 // lewat iqomah
 mainEl.innerHTML = '<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';
@@ -444,12 +483,18 @@ intervalText.innerHTML =
 // Update progress bar berdasarkan detik jam saat ini
 updateProgressBarBySeconds();
 
-// Tambahkan efek rush jika kurang dari 15 menit lagi
+// PERBAIKAN: Tambahkan efek rush jika kurang dari 15 menit lagi dan memiliki iqomah
 const progressBar = document.querySelector('.progress');
-if (now < upcoming.when && (upcoming.when - now) < 15 * 60 * 1000) {
+const timeUntilNext = upcoming.when - now;
+if (timeUntilNext < 15 * 60 * 1000 && timeUntilNext > 0 && hasIqomah(upcoming.name)) {
 progressBar.classList.add('rush');
 } else {
 progressBar.classList.remove('rush');
+}
+
+// PERBAIKAN: Juga tambahkan efek rush saat sedang iqomah
+if (now >= adzanTime && now < iqomahEnd && hasIqomah(upcoming.name)) {
+progressBar.classList.add('rush');
 }
 
 // Update grafik untuk sholat berikutnya
