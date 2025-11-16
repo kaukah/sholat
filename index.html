@@ -1,968 +1,531 @@
 <!doctype html>
 <html lang="id">
 <head>
-<meta charset="utf-8" />
-<meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Sholat Sragen</title>
-<!-- Favicon standar -->
-<link rel="icon" type="image/x-icon" href="icon.ico">
-<link rel="shortcut icon" href="icon.ico" type="image/x-icon">
-<link rel="apple-touch-icon" href="icon.png">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>New Tab</title>
+  <script src="jadwalsholat.js"></script>
+  <style>
+    :root{
+      --bg:#000;
+      --white:#ffffff;
+      --muted:#6b6b6b;
+      --accent:#ff3b30; /* Apple red */
+      --gap:48px;
+      --font-sans:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    html,body{
+      height:100%;
+      margin:0;
+      background:var(--bg);
+      color:var(--white);
+      font-family:var(--font-sans);
+      overflow:hidden;
+      -webkit-font-smoothing:antialiased;
+    }
+    .wrap{
+      display:flex;
+      height:100vh;
+      width:100vw;
+      align-items:center;
+      justify-content:space-between;
+      padding:28px;
+      box-sizing:border-box;
+      gap:var(--gap);
+    }
+    /* ---------- CLOCK ---------- */
+    .clock-area {
+      flex: 0 0 30%; /* 30% width for clock */
+      display: flex;
+      align-items: center;
+      justify-content: flex-start; /* Align clock to the left */
+      min-width: 420px;
+      min-height: 420px;
+    }
+    canvas#clock {
+      width: min(72vh, 68vw); /* Maintain original size */
+      height: min(72vh, 68vw); /* Maintain original size */
+      max-width: 900px; /* Maintain original max size */
+      max-height: 900px; /* Maintain original max size */
+      display: block;
+    }
+    /* ---------- QUOTE & SHOLAT WRAPPER ---------- */
+    .info-wrap {
+      flex: 0 0 60%; /* Combined 60% width for quote and sholat */
+      max-width: 60%;
+      display: flex;
+      flex-direction: column; /* Stack quote and sholat vertically */
+      align-items: flex-start;
+      justify-content: center;
+      gap: 20px; /* Space between quote and sholat */
+    }
+    
+    /* ---------- QUOTE ---------- */
+    .quote-area {
+      flex: 0 0 auto;
+      width: 100%; /* Use full width of info-wrap */
+      color: var(--white);
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
+    .quote {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 20px;
+      font-size: 50px;
+      font-weight: 200;
+      text-align: left; /* Aligned left for better fit with sholat info */
+      line-height: 1.5;
+    }
+    
+    /* ---------- SHOLAT AREA (New) ---------- */
+    .sholat-area {
+	          font-size: clamp(20px, 5vw, 30px); /* Reduced size for sub-info */
+      flex: 0 0 auto;
+      margin-left:25px;
+            margin-top:25px;
+      width: 80%; /* 80% of the quote-area/info-wrap width as requested */
+      min-width: 300px;
+      color: var(--white);
+      text-align: left;
+      /* Styles from sholat only.html body */
+      display: flex;
+      align-items: left;
+      justify-content: left;
+    }
+    #mainText {
+      font-weight: 400;
+      line-height: 1.2;
+      text-align: left;
+      width: 100%;
+    }
+    #mainText strong {
+    }
+    
+    #mainText span {
+      color: #FFAA00;
+      font-weight: 400;
+      line-height: 1;
+    }
 
-	
-<script src="jadwalsholat.js"></script>
-<script src="quotes.js"></script>
-
-<style>
-html,body{margin:0;height:100%;font-family:system-ui,sans-serif;background:#000;color:#fff;margin-top: -50px;}
-body{display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
-#mainText{font-size:clamp(32px,8vw,80px);font-weight:700;line-height:1.2;margin-bottom:20px;margin-top:80px}
-#mainText span{color:#FFAA00;font-weight:400}
-#intervalText{font-size:26px;color:#fff;margin-bottom:20px}
-.progress {
-width: 80vw; /* PERBAIKAN: 80vw dari lebar layar */
-height: 30px;
-background: rgba(255,255,255,0.1);
-border-radius: 999px;
-overflow: hidden;
-margin: 12px auto;
-}
-
-.progress > i {
-display: block;
-height: 100%;
-width: 0%;
-border-radius: inherit;
-
-/* Sederhanakan background - hanya gradasi sederhana */
-background: linear-gradient(90deg, #4aa8ff, #8b5cf6);
-
-/* animasi lebar progres - percepat untuk smart TV */
-transition: width 0.5s linear;
-}
-
-/* Tambahkan kelas untuk efek rush - sederhanakan */
-.progress.rush > i {
-background: linear-gradient(90deg, #ff0000, #ff3333); /* PERBAIKAN: Ubah ke merah */
-animation: blink 1s infinite; /* PERBAIKAN: Tambah animasi kedip */
-}
-
-/* PERBAIKAN: Tambah animasi kedip */
-@keyframes blink {
-0% { opacity: 1; }
-50% { opacity: 0.5; }
-100% { opacity: 1; }
-}
-
-/* PERBAIKAN: Tambah animasi kedip untuk angka menit */
-.blink-text {
-animation: blinkText 1s infinite;
-}
-
-@keyframes blinkText {
-0% { opacity: 1; }
-50% { opacity: 0.3; }
-100% { opacity: 1; }
-}
-
-#quote{margin-top:-20px;font-size:32px;color:#adadad;max-width:900wh;white-space:pre-line;margin-left:auto;margin-right:auto}
-
-/* Dark mode */
-body.dark {
-background: #000;
-color: #fff;
-}
-
-body.dark #mainText span {
-color: #ffb74d; /* oranye lembut */
-}
-
-body.dark #intervalText {
-color: #bbb;
-}
-
-body.dark #quote {
-color: #4d4d4d;
-}
-
-/* Style untuk chart container */
-#chart-container {
-width: 100%;
-max-width: 100%;
-margin: 40px auto 0;
-background: transparent; /* Background transparan */
-border-radius: 8px;
-padding: 20px;
-box-sizing: border-box;
-position: fixed;
-bottom: 0;
-left: 0;
-right: 0;
-height: 220px;
-}
-
-#chart {
-width: 100%;
-height: 180px;
-position: absolute;
-bottom: 10px;
-left: 0;
-}
-
-/* Style untuk label bulan */
-.month-labels {
-position: absolute;
-bottom: 0;
-left: 0;
-right: 0;
-height: 30px;
-display: flex;
-justify-content: space-between;
-padding: 0 20px;
-box-sizing: border-box;
-font-size: 12px;
-color: #aaa;
-}
-
-.month-label {
-text-align: center;
-flex: 1;
-}
-
-/* Style untuk legend grafik */
-.chart-legend {
-position: absolute;
-top: 10px;
-left: 20px;
-display: flex;
-gap: 15px;
-font-size: 16px;
-}
-
-.legend-item {
-display: flex;
-align-items: center;
-gap: 5px;
-}
-
-.legend-color {
-width: 10px;
-height: 10px;
-border-radius: 50%;
-}
-
-/* PERBAIKAN: Tambahkan style untuk jam di tengah halaman */
-#center-clock {
-position: absolute;
-top: 10px;
-left: 50%;
-transform: translateX(-50%);
-font-size: 24px;
-font-weight: normal;
-color: #fff;
-z-index: 100;
-display: flex;
-align-items: center;
-gap: 8px;
-}
-
-#center-clock .time-icon {
-color: #FFAA00;
-}
-
-#center-clock .date-icon {
-color: #4aa8ff;
-}
-
-/* PERBAIKAN: Style untuk tombol toggle di pojok kanan atas */
-#toggleTheme {
-position: absolute;
-top: 10px;
-right: 10px;
-background: none;
-border: 1px solid #666;
-border-radius: 8px;
-padding: 6px 12px;
-cursor: pointer;
-color: inherit;
-z-index: 101;
-}
-
-
-@media (max-width: 600px) {
-#center-clock{
-visibility:hidden;
-display: none;
-}
-#intervalText{
-	font-size:X-large;
-}
-#quote{
-	font-size:X-large;
-	margin-top:20px;
-	margin-bottom:-30px;	
-}
-}
-
-</style>
+    @media (max-aspect-ratio:3/4){
+      .wrap{
+        flex-direction:column;
+        padding:24px;
+        justify-content: flex-start; /* Adjust for mobile/vertical layout */
+      }
+      .clock-area, .info-wrap{
+        width:100%;
+        max-width: 100%;
+      }
+      canvas#clock{
+        width:min(62vh,86vw);
+        height:min(62vh,86vw);
+      }
+      .info-wrap{margin-top:12px;}
+      .quote {
+          font-size: 32px; /* Smaller font on mobile */
+          text-align: center;
+      }
+      .sholat-area {
+        width: 100%;
+        text-align: center;
+      }
+      #mainText {
+        text-align: center;
+      }
+    }
+  </style>
 </head>
-<body class="dark">
-<main>
-<div id="quote">"Quotes & Jadwal disini"</div>
-<div id="mainText"><strong>—</strong><span><i></i></span></div>
-<div id="intervalText">—</div>
-<div class="progress"><i id="intervalProgress"></i></div>
+<body>
+  <div class="wrap">
+    <div class="clock-area">
+      <canvas id="clock"></canvas>
+    </div>
+    <div class="info-wrap">
+      <div class="quote-area">
+        <div class="quote" id="quote">Loading quote...</div>
 
-<span><div class="status-bar" style="color:gray;margin-top:0px;margin-bottom:30px;font-size: 12px;">
-<span class="internet-speed">🌐 ...</span>
+      </div>
+      _____
+      <div class="sholat-area">
 
-</div></span>
+        <div id="sholat-container">
+          </div>
+      </div>
+    </div>
+  </div>
+  <script>
+    /* ---------- CLOCK ---------- */
+    const canvas=document.getElementById('clock');
+    const ctx=canvas.getContext('2d');
+    function resizeCanvas(){
+      const dpr=window.devicePixelRatio||1;
+      const rect=canvas.getBoundingClientRect();
+      canvas.width=Math.round(rect.width*dpr);
+      canvas.height=Math.round(rect.height*dpr);
+      ctx.setTransform(dpr,0,0,dpr,0,0);
+    }
+    function drawClock(){
+      resizeCanvas();
+      const w=canvas.width/(window.devicePixelRatio||1);
+      const h=canvas.height/(window.devicePixelRatio||1);
+      const cx=w/2,cy=h/2;
+      const r=Math.min(w,h)/2*0.92;
+      ctx.clearRect(0,0,w,h);
+      ctx.save();ctx.translate(cx,cy);
+      for(let i=0;i<60;i++){
+        ctx.beginPath();
+        const ang=i*Math.PI/30;
+        const inner=r*(i%5===0?0.82:0.88);
+        const outer=r*0.97;
+        ctx.lineWidth=i%5===0?3:1.3;
+        ctx.strokeStyle=i%5===0?'rgba(255,255,255,0.95)':'rgba(255,255,255,0.25)';
+        ctx.moveTo(Math.cos(ang)*inner,Math.sin(ang)*inner);
+        ctx.lineTo(Math.cos(ang)*outer,Math.sin(ang)*outer);
+        ctx.stroke();
+      }
+      ctx.fillStyle='white';
+      ctx.font=`${Math.round(r*0.14)}px system-ui`;
+      ctx.textAlign='center';
+      ctx.textBaseline='middle';
+      for(let n=1;n<=12;n++){
+        const ang=n*Math.PI/6 - Math.PI/2;
+        ctx.fillText(n,Math.cos(ang)*r*0.64,Math.sin(ang)*r*0.64);
+      }
+      const now=new Date();
+      const s=now.getSeconds()+now.getMilliseconds()/1000;
+      const m=now.getMinutes()+s/60;
+      const hr=(now.getHours()%12)+m/60;
+      drawHand(hr*Math.PI/6-Math.PI/2,r*0.48,Math.max(12,r*0.045),'white');
+      drawHand(m*Math.PI/30-Math.PI/2,r*0.78,Math.max(7,r*0.035),'white');
+      drawHand(s*Math.PI/30-Math.PI/2,r*0.9,Math.max(2,r*0.008),'#ff8000',-r*0.18);
+      ctx.restore();
+    }
+    function drawHand(angle,length,width,color,backLength=0){
+      ctx.beginPath();
+      ctx.lineWidth=width;
+      ctx.lineCap='round';
+      ctx.strokeStyle=color;
+      ctx.moveTo(Math.cos(angle)*backLength,Math.sin(angle)*backLength);
+      ctx.lineTo(Math.cos(angle)*length,Math.sin(angle)*length);
+      ctx.stroke();
+    }
+    function tick(){drawClock();requestAnimationFrame(tick);}
+    requestAnimationFrame(tick);
+    window.addEventListener('resize',()=>{resizeCanvas();drawClock();});
 
-<!-- PERBAIKAN: Tambahkan jam di tengah halaman -->
-<div id="center-clock">
-<span class="time-icon">🕒</span>
-<span id="center-time">--:--</span>
-<span class="date-icon">📅</span>
-<span id="center-date">--- ---- ----</span>
-</div>
+    /* ---------- QUOTE ---------- */
+    const quoteEl = document.getElementById('quote');
+    const quotes = [
+"🙏 Bahagia itu sederhana: Hati yang penuh bersyukur",
+"🌟 Dream Create Future",
+"🌗 Dunia itu Bayangan, Akhirat itu Cahaya",
+"🐇❌ Mengejar 2 Kelinci akan kehilangan keduanya",
+"💰 Allah sebaik-baik Pemberi Rejeki",
+"🌈 Setelah kesusahan pasti ada kemudahan",
+"🚫 Maksiat = Penghalang Datangnya Rahmat Allah",
+"🧠❌ Jalani bisnis jangan pakai akal, tapi pakai iman",
+"🚪 Allah akan memberikan jalan bagi hamba yang takwa",
+"🤝 Sebaik-baik manusia adalah yang bermanfaat bagi sesama",
+"🦋 Jangan kejar kupu-kupu, buatlah kebun, nanti datang sendirinya",
+"🧭 Jika Allah ridho, hidupmu akan tertata",
+"⚔️ Jihad terbesar = Melawan hawa nafsu",
+"🙊 Jangan keluhkan hidupmu, salahkan malasmu",
+"🕌 Qobliyah Subuh = Penakluk Dunia",
+"📿 Allahumma Faqihna Fiddin",
+"💸 Hidup itu murah, yang mahal gengsi",
+"🧠 Orang Pintar kalah dengan Orang Beruntung",
+"💪 Pengen mulya kudu wani rekoso, kuat ngelawan goda",
+"🏆 Kesuksesan bukan dari usaha kita, tapi rahmat dari Allah",
+"🎯 Cepat sukses = Ridho orang tua",
+"💖 Tidak berkurang harta yang disedekahkan, malah bertambah",
+"💪 Setiap orang sedang berjuang dengan ujiannya masing-masing",
+"❤️‍🔥 Qolbun Syakur = Hati yang selalu bersyukur",
+"👨‍👩‍👧 Jadilah orang tua yang berkualitas",
+"🛐 Perbaiki sholatmu, Allah akan perbaiki hidupmu",
+"⚡ Tidak ada musibah tanpa didahului dosa",
+"🕋 Ya Sayyidi Ya Rosulallah Khud Biyyadi Qolat Hillati Adrikni",
+"🗝️ Kunci doa = yakin terkabul 💪",
+"🪄 Kunci sukses: Bekti Wong Tuo, Mertuo & Guru",
+"🤲 Ya Allah berikan Hidayah, Taufiq & Ridho-Mu",
+"🧘‍♂️ Kunci kemuliaan ada di hati yang nerimo",
+"🛠️ Apapun masalahmu = Benahi dulu sholatmu",
+"🛤️ Istiqomah = Sukses yang langgeng",
+"🧠✨ Hal besar dicapai dengan cara yang tak logis & matematis",
+"🚫 Mustahil Allah membawamu sejauh ini hanya untuk gagal",
+"💰 Cara cepat kaya = Bersyukur ala kulli hal",
+"🏡 Memuliakan tamu = Memperlancar rejeki",
+"⛵ Perahu aman di dermaga, tapi bukan itu tujuan dibuat",
+"💸 Boroslah dalam sedekah, biarkan uang panggil temannya",
+"🌞 Datangi cahaya, bayangan akan di bawah kakimu",
+"🚫 Ya Allah hilangkan semua kesempatan untuk bermaksiat",
+"📦 Rejeki sudah tertakar, tidak akan tertukar",
+"🐃 Hawa nafsu = Sifat hewan & ujian dari Allah",
+"🙇‍♂️ Ya Allah, aku tidak mau lelah cari hartamu, tapi ingin lelah bagi-bagi rejeki-Mu",
+"🕌 Goal bisnis bukan hanya cari uang, tapi juga bangun tim yang ngaji & dzikir",
+"💥 Ujian hawa nafsu = Tanda akan datang rejeki besar",
+"📜 Takdir milik Allah, doa & usaha milik kita",
+"📣 Alhamdulillah ’ala kulli hal",
+"😊 Bahagia itu sederhana, bersyukur atas yang kamu miliki",
+"📖 Berdoalah kepada-Ku niscaya akan Ku-kabulkan doamu (QS Ghafir:60)",
+"🌊 Tetap tenang, kuasai ombak – Calm down, ride the wave",
+"💼 Niat kerja: cari ridho Allah agar diberi kemudahan & kecukupan",
+"🧘‍♀️ Kita terlalu banyak meminta, kadang lupa bersyukur atas tubuh yang sehat",
+"🧠 Hakikat hidup adalah pengendalian diri",
+"🙈 Dosa = Penghalang terkabulnya doa",
+"🕋 Segala sesuatu jika tidak diniati ibadah, maka hasilnya hanya dunia",
+"🌌 Doa setelah tahajud = Anak panah yang tepat sasaran",
+"✨ Kita tidak akan pernah tahu rencana Allah, selalu husnudzon",
+"⛔ Dosa bisa menghalangi rejeki",
+"🔥 Kalau mimpimu besar, usahamu tak boleh kecil",
+"👨‍👩‍👦 Warisan anak bukan harta, tapi orangtua yang sehat",
+"🧠 Bisnis itu soal mental, dunia ini milik para pemberani",
+"⏳ Hidup itu pilihan, waktu akan terus berkurang",
+"🛏️ Jika kamu tidak menemukan cara menghasilkan uang saat tidur, maka kamu akan kerja seumur hidup",
+"🎁 Sukses itu bonus, tugas kita adalah ikhtiar dan cari ridho Allah",
+"🥚 Jangan taruh semua telur dalam satu keranjang",
+"😈 Musuh paling menakutkan = Hawa nafsu bermaksiat",
+"🛡️ Hasbunallah wa ni’mal wakil – Cukuplah Allah sebagai penolong",
+"😓 Lelahlah dalam ketaatan, karena surga tidak dikelilingi kenyamanan",
+"🚶‍♂️ Hidup bukan soal siapa yang cepat, tapi siapa yang istiqomah",
+"🌌 Jangan remehkan dirimu — bisa jadi doa 1/3 malam mengalahkan rencanamu seumur hidup",
+"📦 Rejeki bukan ditunda, tapi akan datang di waktu yang tepat",
+"🙏 Alhamdulillah ya Allah, aku sangat bersyukur dan bahagia",
+"🧲 Aku adalah magnet uang, semakin banyak uang datang kepadaku",
+"🤲 Robbi inni dzolamtu nafsi faghfirli",
+"📈 Bismillah, omset bulan ini 2 Milyar, aamiin YRA",
+"🕊️ Alhamdulillah ya Allah, terima kasih atas segala Nikmat & Rahmat-Mu",
+"😭 Percuma Omset Besar kalo tidak Berkah & Toyyib",
+"❌ Maksiat dan Kaya tidak bisa bersatu, Pilih salah satu",
+"🚀 Nothing is Easy but Nothing is impossible",
+"🚀 Yakinlah Jika Allah sudah ikut Andil maka Tidak ada yang Mustahil",
+"⚔️ If you know the enemy and know yourself, you will win of a hundred battles",
+"🤜 Strategi tanpa Cara = Jalan paling lambat untuk Menang, Cara tanpa Strategi = Teriakan menuju Kekalahan",
+"😛 Lidah yg tergigit saat makan  bukti bahwa kamu bisa gagal meskipun pengalaman puluhan tahun",
+"💬 Kalo ada yang ngomongin kita dibelakang, berarti kita lagi didepan",
+"😮‍💨 Lelah itu pasti, tapi menyerah bukan solusi",
+"🤲 Manusia Punya Kendala, tapi Allah Punya Kendali",
+"🌤️ Apapun yang terjadi hari ini pada kita itu pasti yang terbaik",
+"👁️‍🗨️ Seandainya manusia bisa melihat takdirnya, maka mereka akan ridho dengan takdirnya",
+"💸 Cobaan yang paling ringan itu tidak punya uang",
+"🤑💃 Cobaan yang paling berat itu uang banyak dan digoda wanita cantik",
+"🔺 Target Hari ini adalah mengalahkanmu yang kemarin",
+"⚔️ Samurai yang tajam dibuat dari besi yang dibakar dan dipukul – dan itulah prosesnya",
+"🌊 Pelaut yang hebat lahir dari ombak besar dan badai yang ganas",
+"🌧️🌈 Setelah hujan dan badai, pasti ada pelangi",
+"🕌 Sesungguhnya bersama kesulitan ada kemudahan (QS. Al-Insyirah: 5–6)",
+"💡 1 Kesulitan mustahil mengalahkan 2 Kemudahan",
+"🙏 Dan barangsiapa yang bertawakkal kepada Allah, niscaya Allah akan mencukupkan (keperluan)nya. (65:3)",
+"⚓ Pelaut yang handal tidak dilahirkan oleh laut yang tenang",
+"📈 Kualitas manusia tergantung pada tahap kehidupan yang dijalani",
+"🧠🔥 Kontrol emosimu — jika kamu emosi pada orang lain, maka mereka punya kontrol padamu",
+"🌿 Imun Booster = 🍋 Lemon, 🍯 Madu, 🌴 Kurma, 🌶️ Jahe, 🥛 Yogurt, 🧄 Bawang Putih Bakar",
+"🩺 Kepanikan adl separuh penyakit, 😌 Ketenangan adl separuh obat, 🕊️ Kesabaran adl permulaan kesembuhan",
+"💼 Sukses bukan hanya kerja keras 💪, tapi juga soal ✨ afirmasi dan 💰 memahami sifat uang",
+"⚡ PERUBAHAN NASIB hanya akan kita alami jika kita BERANI melakukan hal yang BERBEDA 🔥",
+"👦 Anak di pondok menjadi 💝 sumber rejeki untuk 👨‍👩‍👧 orang tuanya",
+"⏰ Ujian datang ketika ada adzan – godaan setan untuk menunda salat 🕌",
+"💸 Jika rezeki hanya soal kerja keras, tukang becaklah yang paling kaya. Rezeki itu rahmat Allah 🤲",
+"🕊️ Cari rezeki bukan karena jumlahnya, tapi karena berkahnya 🌿",
+"🏃‍♂️ Rezeki itu sifatnya mengejar, bukan dikejar. Ia mendatangi orang yang tawakal 🌟",
+"🌊 Sawang sinawang – orang yang merasa kurang sebenarnya kurang bersyukur 🙏",
+"🤲 Allah suka dengan hamba yang selalu datang berdoa kepada-Nya 💖",
+"💳 Orang yang berhutang itu tidak yakin bahwa besok ada pertolongan dari Allah, padahal Allah Maha Pemberi Cukup 🌙",
+"🚪 Kesempatan tidak datang dua kali. Yang terlambat hanya akan menyesal 😔",
+"🌅 Momentum itu seperti matahari terbit, kalau terlambat bangun, kamu akan kehilangannya 🌞",
+"💡 Ide hanya bernilai ketika dieksekusi. Menunda = kehilangan peluang 🔑",
+"⏳ Siapa yg menunggu waktu tepat, Dia sering kehilangan waktu terbaik 🕰️",
+"⚡ Momentum datang sebentar, lalu pergi tanpa kabar. Yang berani ambil segera = pemenang 🏆",
+"😴 Setiap menit bermalas-malasan = utang yang dibayar dengan penyesalan kelak 🥀",
+"🌅 Sholat Dhuha = pembuka rezeki, petunjuk dan jalan setiap masalah.",
+"🕰️ Kerja hanya selingan untuk menunggu waktu Sholat.",
+"📖 Jika Allah menolongmu, tidak ada yang bs (menghalangi) mengalahkan-Nya (3:160)",
+"🤲 Disaat terjatuh, kembalilah pd Allah. begitu mudah Allah membalikkan sesuatu smp dunia lari mengejarmu",
+"💰 Orang yg tidak bisa manage uang pribadi, maka dia tidak bisa manage uang bisnis – Pak Win.",
+"📌 Prinsip Keuangan = No 1 JANGAN HUTANG!! 💳 No 2 GAYA HIDUP HARUS SAMA meski income naik.",
+"⚠️ Hutang = JEBAKAN UANG – Seolah-olah uang kita banyak 💸 tapi justru ganggu cashflow.",
+"💪 Lebih baik capek saat muda 👦 daripada saat tua 👴, karena tenaga & otak sudah berbeda.",
+"⚡ Perfeksionis akan kalah dengan orang yang action cepat 🚀 untuk menuju sukses.",
+"⏳ Waktu tidak bisa dibalik. Jangan sampai menyesal di masa tua karena muda tidak mau kerja keras.",
+"💎 Kekayaan itu datang pada orang yang tahan tekanan paling lama – Pak Win.",
+"🍜 Banyak bisnis tidak menjadi kaya. Antoni Salim hanya fokus jualan Indomie dan punya profit 10 trilyun setahun.",
+"👶 MUDA = usia produktif, 👴 TUA = usia pensiun.",
+"🚰 ORANG PIPA BOCOR = tidak bisa manajemen, tidak mikir jangka panjang, berapapun uang habis",
+"🌳 Semakin tinggi pohon, semakin besar angin",
+"🙈 Monyet tidak akan jatuh terkena badai, tp jatuh karena angin sepoi2 yang melenakan",
+"🤲 Ikhtiar itu syariat, Sukses itu kehendak Allah, Manusia punya ikhtiar, Hasil milik Allah",
+"☁️ Langit tegak tanpa tiang, laut tenang tanpa pagar, burung cari makan tanpa peta, semuanya tetap berjalan",
+"🔥 Bisnis itu mental dulu baru ilmu, carilah hobi yg butuh keberanian & menantang mental",
+"💭 Kadang kita merasa kekurangan, tapi sebenarnya kita yang tidak pernah merasa cukup dan kurang bersyukur",
+"🌟 HIDUP JGN SEDERHANA, Hidup itu harus hebat, luas, kuat, besar dan bermanfaat. Yg SEDERHANA sikapnya",
+"💼 Teken Tekun Tekan - Pegang, Konsisten, Tercapai",
+"",
+"🏆 Wong seng Temen Bakal Tinemu - Manjadda Wajada",
+"💪 Kelihatannya Tidak Mudah tapi insyaallah BISA 💪",
+"😔 Mungkin ada dosa yang membuat rejeki kita tertahan",
+"💫 Rahasia Frekuensi Rejeki = Bukan produk yg sulit laku, tp hati kita blm ikhlas pasrah dan yakin",
+"🌱 Ekonomi boleh sulit, tapi hati jangan ikut sempit. Karna sulit adalah keadaan tercepat dekat dengan Allah",
+"Kemampuan + Kesempatan = Keberuntungan",
+"🤝 Sedekah menarik keberuntungan - Keberuntungan mendatangkan rejeki",
+"⚖️ Bukan soal siapa yang paling cepat, tp siapa yg dikasih Allah keberuntungan (Tukang Parkir RS)",
+"🌿 Orang tua yang sholeh melahirkan anak yang sholeh",
+"🤲 Ya Allah, aku ridho dengan takdir-Mu.",
+"🌤️ Wong duwe Gusti Allah kok bingung — tenang, tetap husnuzon.",
+"📖 Al-Qur’an adalah penawar segala penyakit",
+"🔥 Jika Mimpi besar, Nyali tidak boleh kecil",
+"💫 Rezeki tdk akan salah alamat,buah yg kamu makan sdh tertulis jd rezekimu sejak benihnya ditanam",
+"💎 Sehat itu nikmat no 2,  Rezeki No 3, Nikmat beribadah kepada Allah = tertinggi No 1",
+"🌾 Keberkahan itu membuat rezeki yang sedikit terasa kebanyakan, bukan yang banyak jadi tidak cukup",
+"💼 Kerja itu ibadah, Rezeki itu Jatah",
+"📜 Rezeki dan Kerja Keras tidak ada hubungannya sama sekali. (Hikam)",
+"Kemampuan + Kesempatan = Keberuntungan",
+    ];
 
-<!-- PERBAIKAN: Tombol toggle di pojok kanan atas -->
-<button id="toggleTheme">🌓</button>
-</main>
+    function updateQuote() {
+      const randomIndex = Math.floor(Math.random() * quotes.length);
+      quoteEl.textContent = quotes[randomIndex];
+      setTimeout(updateQuote, 60000); // Update every 60 seconds
+    }
 
-<!-- Grafik Jadwal Sholat -->
-<div id="chart-container">
+    // Start the quote update
+    updateQuote();
 
-<div id="chart"></div>
-<div class="month-labels">
-<span class="month-label">JAN</span>
-<span class="month-label">FEB</span>
-<span class="month-label">MAR</span>
-<span class="month-label">APR</span>
-<span class="month-label">MEI</span>
-<span class="month-label">JUN</span>
-<span class="month-label">JUL</span>
-<span class="month-label">AGU</span>
-<span class="month-label">SEP</span>
-<span class="month-label">OKT</span>
-<span class="month-label">NOV</span>
-<span class="month-label">DES</span>
-</div>
-</div>
+    /* ---------- SHOLAT ONLY SCRIPT CONTENT (Modified) ---------- */
+    // Note: The script content from sholat only.html is included here directly,
+    // but the part that defines the HTML structure/style is already moved to the head/body.
 
-<script>
-const TZ = 'Asia/Jakarta';
-const IQOMAH_MIN = 15 * 60000;
-const pad = n => String(n).padStart(2, '0');
-const fmtHM = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
-const nowJakarta = () => new Date(new Date().toLocaleString('en-US', {
-timeZone: TZ
-}));
-
-function getKey(d) {
-const parts = new Intl.DateTimeFormat('en-CA', {
-timeZone: TZ,
-month: '2-digit',
-day: '2-digit'
-}).formatToParts(d);
-return parts.find(p => p.type === 'month').value + '-' + parts.find(p => p.type === 'day').value;
-}
-
-function parseHM(hm, base) {
-const [h, m] = hm.split(':').map(Number);
-const parts = new Intl.DateTimeFormat('en-CA', {
-timeZone: TZ,
-year: 'numeric',
-month: '2-digit',
-day: '2-digit'
-}).formatToParts(base);
-const y = parts.find(p => p.type === 'year').value;
-const M = parts.find(p => p.type === 'month').value;
-const D = parts.find(p => p.type === 'day').value;
-return new Date(`${y}-${M}-${D}T${pad(h)}:${pad(m)}:00+07:00`);
-}
-
-function getTodayTimes(d) {
-return (typeof prayerTimesData !== 'undefined') ? prayerTimesData[getKey(d)] : null;
-}
-
-// Fungsi untuk mengecek apakah waktu sholat memiliki iqomah
-function hasIqomah(prayerName) {
-// Terbit tidak memiliki iqomah
-return !prayerName.toLowerCase().includes('terbit');
-}
-
-function buildPrayers(now) {
-const list = [];
-const today = getTodayTimes(now);
-if (today) {
-list.push(['Subuh', today.Shubuh]);
-list.push(['Terbit', today.Terbit]); // Tambahkan Terbit
-list.push(['Dhuhur', today.Dzuhur]);
-list.push(['Ashar', today.Ashr]);
-list.push(['Magrib', today.Maghrib]);
-list.push(['Isya', today.Isya]);
-}
-const tmr = getTodayTimes(new Date(now.getTime() + 86400000));
-if (tmr) list.push(['Subuh 🌙', tmr.Shubuh]);
-return list.map(([name, hm]) => ({
-name,
-hm,
-when: parseHM(hm, name.includes('🌙') ? new Date(now.getTime() + 86400000) : now)
-}));
-}
-
-function findPrevNext(prayers, now) {
-let next = prayers.find(p => p.when >= now);
-if (!next) next = prayers[0];
-const prevCandidates = prayers.filter(p => p.when < next.when);
-let prev = prevCandidates.length ? prevCandidates[prevCandidates.length - 1] : null;
-if (!prev) {
-const y = new Date(now.getTime() - 86400000);
-const ylist = buildPrayers(y);
-if (ylist.length) prev = ylist[ylist.length - 1];
-}
-return {
-prev,
-next
-};
-}
-
-const fallbackQuotes = ["Belajar adalah cahaya hidup", "Waktu adalah pedang"];
-let quotesList = (typeof quotes !== 'undefined' && Array.isArray(quotes) && quotes.length > 0) ? quotes.slice() : fallbackQuotes.slice();
-let quoteIndex = Math.floor(Math.random() * quotesList.length);
-
-function showNextQuote() {
-if (!quotesList || quotesList.length === 0) quotesList = fallbackQuotes.slice();
-const randomIndex = Math.floor(Math.random() * quotesList.length);
-document.getElementById('quote').textContent = '"' + quotesList[randomIndex] + '"';
-}
-
-setInterval(showNextQuote, 30000);
-showNextQuote();
-
-const themeBtn = document.getElementById('toggleTheme');
-
-// PERBAIKAN: Perbaiki fungsi toggle theme
-function toggleTheme() {
-document.body.classList.toggle('dark');
-if (document.body.classList.contains('dark')) {
-localStorage.setItem('theme', 'dark');
-} else {
-localStorage.setItem('theme', 'light');
-}
-}
-
-// baca preferensi user dari localStorage
-if (localStorage.getItem('theme') === 'dark') {
-document.body.classList.add('dark');
-}
-
-// PERBAIKAN: Ganti event listener
-themeBtn.addEventListener('click', toggleTheme);
-
-// =============================
-// PROGRESS BAR - VERSI RINGAN UNTUK SMART TV
-// =============================
-// Fungsi untuk update progress bar berdasarkan detik jam saat ini
-function updateProgressBarBySeconds() {
-const now = new Date();
-const seconds = now.getSeconds(); // 0-59
-const milliseconds = now.getMilliseconds(); // 0-999
-
-// Hitung progress: (detik + milidetik/1000) / 60 * 100
-const progress = ((seconds + milliseconds / 1000) / 60) * 100;
-
-// Update progress bar
-document.getElementById('intervalProgress').style.width = progress.toFixed(1) + '%';
-}
-
-// =============================
-// JAM - PERBAIKAN: Tambahkan fungsi untuk jam
-// =============================
-function updateClock() {
-const now = new Date();
-
-// Format untuk tengah halaman (12 jam AM/PM tanpa detik)
-let hours12 = now.getHours();
-const ampm = hours12 >= 12 ? 'PM' : 'AM';
-hours12 = hours12 % 12;
-hours12 = hours12 ? hours12 : 12; // 0 harus diubah menjadi 12
-const minutes12 = pad(now.getMinutes());
-document.getElementById('center-time').textContent = `${hours12}:${minutes12} ${ampm}`;
-
-// Format tanggal
-const monthNames = ['JAN', 'FEB', 'MAR', 'APR', 'MEI', 'JUN', 'JUL', 'AGU', 'SEP', 'OKT', 'NOV', 'DES'];
-const day = now.getDate();
-const month = monthNames[now.getMonth()];
-const year = now.getFullYear();
-document.getElementById('center-date').textContent = `${day} ${month} ${year}`;
-}
-
-// =============================
-// JADWAL SHOLAT
-// =============================
-function updateAll() {
-const now = nowJakarta();
-const prayers = buildPrayers(now).filter(p => !isNaN(p.when));
-if (prayers.length === 0) {
-document.getElementById('mainText').innerHTML = '<strong>Jadwal tidak tersedia</strong>';
-return;
-}
-
-// default prev/next
-let { prev, next } = findPrevNext(prayers, now);
-
-// cek apakah kita sedang dalam waktu iqomah (hanya untuk sholat yang memiliki iqomah)
-const currentAdzan = prayers.find(p => {
-if (!hasIqomah(p.name)) return false; // Lewatkan jika tidak ada iqomah
-const start = p.when;
-const end = new Date(start.getTime() + IQOMAH_MIN);
-return now >= start && now < end;
-});
-
-// kalau sedang iqomah, gunakan currentAdzan sbg next sementara
-let upcoming = currentAdzan || next;
-
-// kalau pakai currentAdzan, prev harus prayer sebelumnya
-if (currentAdzan) {
-const idx = prayers.indexOf(currentAdzan);
-if (idx > 0) {
-prev = prayers[idx - 1];
-} else {
-// fallback ke sholat terakhir kemarin
-const ylist = buildPrayers(new Date(now.getTime() - 86400000));
-if (ylist.length) prev = ylist[ylist.length - 1];
-}
-}
-
-const adzanTime = upcoming.when;
-// Hanya tambahkan iqomah jika waktu sholat memiliki iqomah
-const iqomahEnd = hasIqomah(upcoming.name) ? new Date(adzanTime.getTime() + IQOMAH_MIN) : adzanTime;
-const mainEl = document.getElementById('mainText');
-
-// PERBAIKAN: Hapus kelas blink-text sebelum update
-const mainTextStrong = mainEl.querySelector('strong');
-if (mainTextStrong) {
-mainTextStrong.classList.remove('blink-text');
-}
-
-if (now < adzanTime) {
-// sebelum adzan
-const diff = adzanTime - now;
-const hh = Math.floor(diff / 3600000);
-const mm = Math.floor((diff % 3600000) / 60000);
-
-// Ubah teks berdasarkan nama sholat
-const prayerText = upcoming.name.toLowerCase().includes('terbit') ?
-`menuju ${upcoming.name}` : `lagi adzan ${upcoming.name}`;
-
-mainEl.innerHTML = `<strong>${hh > 0 ? hh + " Jam " : ""}${mm} menit </strong><span><i>${prayerText}</i></span>`;
+    const sholatContainer = document.getElementById('sholat-container');
+    sholatContainer.innerHTML = '<div id="mainText"><strong>—</strong><span><i></i></span></div>';
     
-    // PERBAIKAN: Tambahkan kelas blink-text jika kurang dari 15 menit dan memiliki iqomah
-    if (diff < 15 * 60 * 1000 && hasIqomah(upcoming.name)) {
-        const mainTextStrong = mainEl.querySelector('strong');
-        if (mainTextStrong) {
-            mainTextStrong.classList.add('blink-text');
+    // Begin: Content of sholat only.html <script>
+    const TZ = 'Asia/Jakarta';
+    const IQOMAH_MIN = 15 * 60000;
+    const pad = n => String(n).padStart(2, '0');
+    const fmtHM = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
+    const nowJakarta = () => new Date(new Date().toLocaleString('en-US', {
+      timeZone: TZ
+    }));
+
+    function getKey(d) {
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: TZ,
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(d);
+      return parts.find(p => p.type === 'month').value + '-' + parts.find(p => p.type === 'day').value;
+    }
+
+    function parseHM(hm, base) {
+      const [h, m] = hm.split(':').map(Number);
+      const parts = new Intl.DateTimeFormat('en-CA', {
+        timeZone: TZ,
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+      }).formatToParts(base);
+      const y = parts.find(p => p.type === 'year').value;
+      const M = parts.find(p => p.type === 'month').value;
+      const D = parts.find(p => p.type === 'day').value;
+      return new Date(`${y}-${M}-${D}T${pad(h)}:${pad(m)}:00+07:00`);
+    }
+
+    function getTodayTimes(d) {
+      return (typeof prayerTimesData !== 'undefined') ? prayerTimesData[getKey(d)] : null;
+    }
+
+    function hasIqomah(prayerName) {
+      return !prayerName.toLowerCase().includes('terbit');
+    }
+
+    function buildPrayers(now) {
+      const list = [];
+      const today = getTodayTimes(now);
+      if (today) {
+        list.push(['Subuh', today.Shubuh]);
+        list.push(['Terbit', today.Terbit]);
+        list.push(['Dhuhur', today.Dzuhur]);
+        list.push(['Ashar', today.Ashr]);
+        list.push(['Magrib', today.Maghrib]);
+        list.push(['Isya', today.Isya]);
+      }
+      const tmr = getTodayTimes(new Date(now.getTime() + 86400000));
+      if (tmr) list.push(['Subuh 🌙', tmr.Shubuh]);
+      return list.map(([name, hm]) => ({
+        name,
+        hm,
+        when: parseHM(hm, name.includes('🌙') ? new Date(now.getTime() + 86400000) : now)
+      }));
+    }
+
+    function findPrevNext(prayers, now) {
+      let next = prayers.find(p => p.when >= now);
+      if (!next) next = prayers[0];
+      const prevCandidates = prayers.filter(p => p.when < next.when);
+      let prev = prevCandidates.length ? prevCandidates[prevCandidates.length - 1] : null;
+      if (!prev) {
+        const y = new Date(now.getTime() - 86400000);
+        const ylist = buildPrayers(y);
+        if (ylist.length) prev = ylist[ylist.length - 1];
+      }
+      return {
+        prev,
+        next
+      };
+    }
+
+    function updateAll() {
+      const now = nowJakarta();
+      const prayers = buildPrayers(now).filter(p => !isNaN(p.when));
+      if (prayers.length === 0) {
+        document.getElementById('mainText').innerHTML = '<strong>Jadwal tidak tersedia</strong>';
+        return;
+      }
+
+      let { prev, next } = findPrevNext(prayers, now);
+
+      const currentAdzan = prayers.find(p => {
+        if (!hasIqomah(p.name)) return false;
+        const start = p.when;
+        const end = new Date(start.getTime() + IQOMAH_MIN);
+        return now >= start && now < end;
+      });
+
+      let upcoming = currentAdzan || next;
+
+      if (currentAdzan) {
+        const idx = prayers.indexOf(currentAdzan);
+        if (idx > 0) {
+          prev = prayers[idx - 1];
+        } else {
+          const ylist = buildPrayers(new Date(now.getTime() - 86400000));
+          if (ylist.length) prev = ylist[ylist.length - 1];
         }
+      }
+
+      const adzanTime = upcoming.when;
+      const iqomahEnd = hasIqomah(upcoming.name) ? new Date(adzanTime.getTime() + IQOMAH_MIN) : adzanTime;
+      const mainEl = document.getElementById('mainText');
+
+      if (now < adzanTime) {
+        const diff = adzanTime - now;
+        const hh = Math.floor(diff / 3600000);
+        const mm = Math.floor((diff % 3600000) / 60000);
+        const prayerText = upcoming.name.toLowerCase().includes('terbit') ?
+          `menuju ${upcoming.name}` : `lagi adzan ${upcoming.name}`;
+        mainEl.innerHTML = `<strong>${hh > 0 ? hh + " Jam " : ""}${mm} menit </strong><span><i>${prayerText}</i></span>`;
+      } else if (now >= adzanTime && now < iqomahEnd && hasIqomah(upcoming.name)) {
+        const diff = Math.ceil((iqomahEnd - now) / 60000);
+        mainEl.innerHTML = `<strong>${diff} menit</strong><span><i> lagi iqomah ${upcoming.name}</i></span>`;
+      } else {
+        mainEl.innerHTML = '<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';
+      }
     }
-} else if (now >= adzanTime && now < iqomahEnd && hasIqomah(upcoming.name)) {
-// dalam waktu iqomah (hanya untuk sholat yang memiliki iqomah)
-const diff = Math.ceil((iqomahEnd - now) / 60000);
-mainEl.innerHTML = `<strong>${diff} menit</strong><span><i> lagi iqomah ${upcoming.name}</i></span>`;
-    
-    // PERBAIKAN: Tambahkan kelas blink-text untuk iqomah
-    const mainTextStrong = mainEl.querySelector('strong');
-    if (mainTextStrong) {
-        mainTextStrong.classList.add('blink-text');
-    }
-} else {
-// lewat iqomah
-mainEl.innerHTML = '<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';
-}
 
-// interval progress
-if (prev && upcoming) {
-const intervalText = document.getElementById('intervalText');
-const deltaMs = now - prev.when;
-const deltaH = Math.floor(deltaMs / 3600000);
-const deltaM = Math.floor((deltaMs % 3600000) / 60000);
-
-// ✨ Tambah info Tahajud
-let tahajudInfo = '';
-const besok = new Date(now.getTime() + 86400000);
-const prayersBesok = buildPrayers(besok);
-const nextSubuhBesok = prayersBesok.find(p => p.name.toLowerCase().includes('subuh'));
-if (nextSubuhBesok) {
-const tahajudTime = new Date(nextSubuhBesok.when);
-tahajudTime.setHours(4, 0, 0, 0); // jam 04:00 besok
-const diffTahajud = Math.round((nextSubuhBesok.when - tahajudTime) / 60000);
-tahajudInfo = ` • ⏳ <strong>Tahajud</strong> ${diffTahajud} menit (Subuh Besok ${nextSubuhBesok.hm})`;
-}
-
-intervalText.innerHTML =
-`⏱️ <strong>${prev.name}</strong> lewat ${deltaH > 0 ? deltaH + ':' : ''}${deltaM} • 🕌 <strong>${upcoming.name}</strong> ${upcoming.hm}${tahajudInfo}`;
-
-// Update progress bar berdasarkan detik jam saat ini
-updateProgressBarBySeconds();
-
-// PERBAIKAN: Tambahkan efek rush jika kurang dari 15 menit lagi dan memiliki iqomah
-const progressBar = document.querySelector('.progress');
-const timeUntilNext = upcoming.when - now;
-if (timeUntilNext < 15 * 60 * 1000 && timeUntilNext > 0 && hasIqomah(upcoming.name)) {
-progressBar.classList.add('rush');
-} else {
-progressBar.classList.remove('rush');
-}
-
-// PERBAIKAN: Juga tambahkan efek rush saat sedang iqomah
-if (now >= adzanTime && now < iqomahEnd && hasIqomah(upcoming.name)) {
-progressBar.classList.add('rush');
-}
-
-// Update grafik untuk sholat berikutnya
-updateChartForNextPrayer(upcoming.name);
-}
-}
-
-// =============================
-// BATTERY INFO (lengkap)
-// =============================
-function initBattery() {
-const el = document.querySelector('.battery');
-if (!navigator.getBattery) {
-el.textContent = "-";
-return;
-}
-navigator.getBattery().then(function(battery) {
-function updateBattery() {
-let level = Math.round(battery.level * 100);
-let charging = battery.charging ? "Charging" : "Not Charging";
-let time = "";
-if (battery.charging && battery.chargingTime !== Infinity) {
-let h = Math.floor(battery.chargingTime / 3600);
-let m = Math.floor((battery.chargingTime % 3600) / 60);
-time = `Baterai Full: ${h} jam ${m} menit`;
-} else if (!battery.charging && battery.dischargingTime !== Infinity) {
-let h = Math.floor(battery.dischargingTime / 3600);
-let m = Math.floor((battery.dischargingTime % 3600) / 60);
-time = ` ${h} jam ${m} menit`;
-}
-el.innerHTML = `
-<div>🔋 ${level}% ⚡ ${charging} ⏳ ${time}</div>
-`;
-}
-updateBattery();
-battery.addEventListener('levelchange', updateBattery);
-battery.addEventListener('chargingchange', updateBattery);
-battery.addEventListener('chargingtimechange', updateBattery);
-battery.addEventListener('dischargingtimechange', updateBattery);
-});
-}
-
-// =============================
-// INTERNET INFO (lengkap)
-// =============================
-function initInternetInfo() {
-const speedEl = document.querySelector('.internet-speed');
-if (!speedEl) return;
-
-function updateInfo() {
-const conn = navigator.connection || navigator.mozConnection || navigator.webkitConnection;
-let downlink = conn ? `${conn.downlink} Mbps` : "-";
-let connInfo = conn ?
-`${conn.effectiveType.toUpperCase()} • 🔴 ${conn.rtt} ms `
-: "-";
-
-speedEl.innerHTML = `
-<div>🚀 ${downlink} • 🌐 ${connInfo} </div>
-`;
-}
-
-updateInfo();
-window.addEventListener('online', updateInfo);
-window.addEventListener('offline', updateInfo);
-if (navigator.connection) navigator.connection.addEventListener('change', updateInfo);
-}
-
-// =============================
-// IP INFO
-// =============================
-async function initIP() {
-const el = document.querySelector('.ip-info');
-try {
-const res = await fetch("https://api.ipify.org?format=json");
-const data = await res.json();
-el.innerHTML = `🌎 IP: ${data.ip}`;
-} catch (err) {
-el.innerHTML = "🌎 IP: Error";
-}
-}
-
-// =============================
-// GRAFIK JADWAL SHOLAT - VERSI RINGAN UNTUK SMART TV
-// =============================
-// Fungsi untuk mengumpulkan data jadwal sholat selama setahun
-function collectYearPrayerData(prayerName) {
-const data = [];
-const now = new Date();
-const currentYear = now.getFullYear();
-
-// Loop untuk setiap hari dalam setahun
-for (let month = 1; month <= 12; month++) {
-for (let day = 1; day <= 31; day++) {
-// Cek apakah tanggal valid
-const date = new Date(currentYear, month - 1, day);
-if (date.getMonth() !== month - 1) continue; // Skip jika tanggal tidak valid
-
-const key = `${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-const times = getTodayTimes(date);
-
-if (times) {
-let prayerTime;
-
-// PERBAIKAN: Tambahkan penanganan untuk "Terbit"
-switch(prayerName) {
-case 'Subuh': prayerTime = times.Shubuh; break;
-case 'Dhuhur': prayerTime = times.Dzuhur; break;
-case 'Ashar': prayerTime = times.Ashr; break;
-case 'Magrib': prayerTime = times.Maghrib; break;
-case 'Isya': prayerTime = times.Isya; break;
-case 'Terbit': prayerTime = times.Terbit; break; // TAMBAHKAN INI
-}
-
-if (prayerTime) {
-const [h, m] = prayerTime.split(':').map(Number);
-const minutes = h * 60 + m;
-data.push({
-date: date,
-dateStr: `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}`,
-month: month,
-day: day,
-time: prayerTime,
-minutes: minutes
-});
-}
-}
-}
-}
-
-return data;
-}
-
-// Fungsi untuk membuat grafik yang lebih ringan untuk smart TV
-function createChart(data, prayerName) {
-const chartEl = document.getElementById('chart');
-chartEl.innerHTML = '';
-
-if (!data || data.length === 0) {
-chartEl.innerHTML = '<p>Data tidak tersedia</p>';
-return;
-}
-
-// Buat canvas untuk grafik
-const canvas = document.createElement('canvas');
-canvas.width = chartEl.clientWidth;
-canvas.height = chartEl.clientHeight;
-chartEl.appendChild(canvas);
-
-const ctx = canvas.getContext('2d');
-
-// Atur padding
-const padding = {
-top: 40, // Tambah padding atas untuk legend
-right: 20,
-bottom: 30,
-left: 40
-};
-
-const graphWidth = canvas.width - padding.left - padding.right;
-const graphHeight = canvas.height - padding.top - padding.bottom;
-
-// Cari nilai minimum dan maksimum
-const minMinutes = Math.min(...data.map(d => d.minutes));
-const maxMinutes = Math.max(...data.map(d => d.minutes));
-
-// Cari data untuk waktu terawal dan terakhir
-const minEntry = data.find(d => d.minutes === minMinutes);
-const maxEntry = data.find(d => d.minutes === maxMinutes);
-
-// Sederhanakan gradien untuk performa lebih baik
-const gradient = ctx.createLinearGradient(0, padding.top, 0, padding.top + graphHeight);
-gradient.addColorStop(0, 'rgba(74, 168, 255, 0.4)');
-gradient.addColorStop(1, 'rgba(74, 168, 255, 0.05)');
-
-// Bersihkan canvas
-ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-// Gambar grid lines untuk pemisah bulan - kurangi frekuensi untuk performa
-ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-ctx.lineWidth = 1;
-
-// Gambar garis horizontal - hanya 3 garis untuk mengurangi beban
-for (let i = 0; i <= 2; i++) {
-const y = padding.top + (i / 2) * graphHeight;
-ctx.beginPath();
-ctx.moveTo(padding.left, y);
-ctx.lineTo(padding.left + graphWidth, y);
-ctx.stroke();
-}
-
-// Gambar garis vertikal (pemisah bulan) - hanya 6 garis untuk mengurangi beban
-for (let i = 1; i < 12; i += 2) {
-const x = padding.left + (i / 12) * graphWidth;
-ctx.beginPath();
-ctx.moveTo(x, padding.top);
-ctx.lineTo(x, padding.top + graphHeight);
-ctx.stroke();
-}
-
-// Gambar kurva dengan lebih sedikit titik untuk performa lebih baik
-ctx.beginPath();
-ctx.strokeStyle = '#4aa8ff';
-ctx.lineWidth = 3;
-ctx.lineJoin = 'round';
-
-// Ambil sampel data setiap 3 hari untuk mengurangi jumlah titik
-const sampledData = [];
-for (let i = 0; i < data.length; i += 3) {
-sampledData.push(data[i]);
-}
-// Pastikan data terakhir masuk
-if (data.length > 0 && !sampledData.includes(data[data.length - 1])) {
-sampledData.push(data[data.length - 1]);
-}
-
-for (let i = 0; i < sampledData.length; i++) {
-const dataIndex = data.indexOf(sampledData[i]);
-const x = padding.left + (dataIndex / (data.length - 1)) * graphWidth;
-const y = padding.top + graphHeight - ((sampledData[i].minutes - minMinutes) / (maxMinutes - minMinutes)) * graphHeight;
-
-if (i === 0) {
-ctx.moveTo(x, y);
-} else {
-ctx.lineTo(x, y);
-}
-}
-ctx.stroke();
-
-// Gambar area di bawah kurva dengan data yang sama
-ctx.beginPath();
-ctx.moveTo(padding.left, padding.top + graphHeight);
-
-for (let i = 0; i < sampledData.length; i++) {
-const dataIndex = data.indexOf(sampledData[i]);
-const x = padding.left + (dataIndex / (data.length - 1)) * graphWidth;
-const y = padding.top + graphHeight - ((sampledData[i].minutes - minMinutes) / (maxMinutes - minMinutes)) * graphHeight;
-
-ctx.lineTo(x, y);
-}
-
-ctx.lineTo(padding.left + graphWidth, padding.top + graphHeight);
-ctx.closePath();
-ctx.fillStyle = gradient;
-ctx.fill();
-
-// Tandai titik tanggal saat ini - PERBAIKAN: warna merah dan lebih besar
-const today = new Date();
-const todayData = data.find(d =>
-d.date.getDate() === today.getDate() &&
-d.date.getMonth() === today.getMonth()
-);
-
-if (todayData) {
-const todayIndex = data.indexOf(todayData);
-const x = padding.left + (todayIndex / (data.length - 1)) * graphWidth;
-const y = padding.top + graphHeight - ((todayData.minutes - minMinutes) / (maxMinutes - minMinutes)) * graphHeight;
-
-// Gambar garis vertikal tebal dari bawah sampai atas
-ctx.beginPath();
-ctx.strokeStyle = 'rgba(255, 255, 255, 0.7)';
-ctx.lineWidth = 2; // Lebih tebal
-ctx.moveTo(x, padding.top + graphHeight); // Dari bawah grafik
-ctx.lineTo(x, padding.top); // Sampai atas grafik
-ctx.stroke();
-
-// Gambar titik untuk hari ini - PERBAIKAN: warna merah dan lebih besar
-ctx.beginPath();
-ctx.fillStyle = '#ff4757';
-ctx.arc(x, y, 8, 0, Math.PI * 2); // PERBAIKAN: radius 8 (lebih besar)
-ctx.fill();
-
-// Gambar lingkaran putih di dalam
-ctx.beginPath();
-ctx.fillStyle = '#ffffff';
-ctx.arc(x, y, 4, 0, Math.PI * 2); // PERBAIKAN: radius 4 (lebih besar)
-ctx.fill();
-
-// Format tanggal dengan jam: 11 Okt 2025 05:30
-const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-const formattedDate = `${todayData.day} ${monthNames[todayData.date.getMonth()]} ${todayData.date.getFullYear()}`;
-
-// Format jam untuk tanggal saat ini
-const [hours, minutes] = todayData.time.split(':').map(Number);
-const hours12 = hours % 12 || 12;
-const ampm = hours >= 12 ? 'PM' : 'AM';
-const formattedTime = `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-
-// Tambahkan label tanggal di atas grafik dengan jam
-ctx.fillStyle = '#ffffff';
-ctx.font = 'bold 18px sans-serif'; // Ukuran font untuk teks terkini
-ctx.textAlign = 'center';
-ctx.fillText(`${formattedDate} ${formattedTime}`, x, padding.top - 5); // Posisi di atas grafik dengan jarak 5px
-}
-
-// Tandai titik waktu terawal - PERBAIKAN: warna biru seperti garis
-if (minEntry) {
-const minIndex = data.indexOf(minEntry);
-const x = padding.left + (minIndex / (data.length - 1)) * graphWidth;
-const y = padding.top + graphHeight - ((minEntry.minutes - minMinutes) / (maxMinutes - minMinutes)) * graphHeight;
-
-// Gambar titik untuk waktu terawal - PERBAIKAN: warna biru
-ctx.beginPath();
-ctx.fillStyle = '#4aa8ff'; // PERBAIKAN: warna biru seperti garis
-ctx.arc(x, y, 6, 0, Math.PI * 2);
-ctx.fill();
-
-// Gambar lingkaran putih di dalam
-ctx.beginPath();
-ctx.fillStyle = '#ffffff';
-ctx.arc(x, y, 3, 0, Math.PI * 2);
-ctx.fill();
-
-// Format tanggal dengan jam
-const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-const formattedDate = `${minEntry.day} ${monthNames[minEntry.date.getMonth()]} ${minEntry.date.getFullYear()}`;
-
-// Format jam untuk waktu terawal
-const [hours, minutes] = minEntry.time.split(':').map(Number);
-const hours12 = hours % 12 || 12;
-const ampm = hours >= 12 ? 'PM' : 'AM';
-const formattedTime = `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-
-// Tambahkan label tanggal dengan posisi yang disesuaikan
-ctx.fillStyle = '#ffffff';
-ctx.font = '11px sans-serif'; // PERBAIKAN: Kecilkan 60% dan hapus bold
-ctx.textAlign = 'center';
-
-// Cek posisi untuk menghindari tumpang tindih
-let textY = y - 15; // Posisi default di atas titik
-
-// Jika terlalu dekat dengan atas grafik, pindahkan ke bawah
-if (textY < padding.top + 15) {
-textY = y + 15; // Posisi di bawah titik
-}
-
-ctx.fillText(`${formattedDate} ${formattedTime}`, x, textY);
-}
-
-// Tandai titik waktu terakhir - PERBAIKAN: warna biru seperti garis
-if (maxEntry) {
-const maxIndex = data.indexOf(maxEntry);
-const x = padding.left + (maxIndex / (data.length - 1)) * graphWidth;
-const y = padding.top + graphHeight - ((maxEntry.minutes - minMinutes) / (maxMinutes - minMinutes)) * graphHeight;
-
-// Gambar titik untuk waktu terakhir - PERBAIKAN: warna biru
-ctx.beginPath();
-ctx.fillStyle = '#4aa8ff'; // PERBAIKAN: warna biru seperti garis
-ctx.arc(x, y, 6, 0, Math.PI * 2);
-ctx.fill();
-
-// Gambar lingkaran putih di dalam
-ctx.beginPath();
-ctx.fillStyle = '#ffffff';
-ctx.arc(x, y, 3, 0, Math.PI * 2);
-ctx.fill();
-
-// Format tanggal dengan jam
-const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
-const formattedDate = `${maxEntry.day} ${monthNames[maxEntry.date.getMonth()]} ${maxEntry.date.getFullYear()}`;
-
-// Format jam untuk waktu terakhir
-const [hours, minutes] = maxEntry.time.split(':').map(Number);
-const hours12 = hours % 12 || 12;
-const ampm = hours >= 12 ? 'PM' : 'AM';
-const formattedTime = `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
-
-// Tambahkan label tanggal dengan posisi yang disesuaikan
-ctx.fillStyle = '#ffffff';
-ctx.font = '11px sans-serif'; // PERBAIKAN: Kecilkan 60% dan hapus bold
-ctx.textAlign = 'center';
-
-// Cek posisi untuk menghindari tumpang tindih
-let textY = y - 15; // Posisi default di atas titik
-
-// Jika terlalu dekat dengan atas grafik, pindahkan ke bawah
-if (textY < padding.top + 15) {
-textY = y + 15; // Posisi di bawah titik
-}
-
-ctx.fillText(`${formattedDate} ${formattedTime}`, x, textY);
-}
-
-// Gambar sumbu Y (waktu) - disesuaikan dengan rentang waktu sholat
-ctx.fillStyle = '#cccccc';
-ctx.font = '12px sans-serif'; // PERBAIKAN: Perbesar font
-ctx.textAlign = 'right';
-ctx.textBaseline = 'middle';
-
-// Tambahkan label waktu di sumbu Y
-for (let i = 0; i <= 4; i++) {
-const value = minMinutes + (maxMinutes - minMinutes) * (1 - i / 4);
-const hours = Math.floor(value / 60);
-const minutes = Math.floor(value % 60);
-const timeStr = `${pad(hours)}:${pad(minutes)}`;
-
-const y = padding.top + (i / 4) * graphHeight;
-ctx.fillText(timeStr, padding.left - 5, y);
-}
-}
-
-// Fungsi untuk update grafik berdasarkan sholat berikutnya
-function updateChartForNextPrayer(currentPrayer) {
-// Hapus "🌙" jika ada
-const cleanPrayer = currentPrayer.replace(' 🌙', '');
-
-// Kumpulkan data untuk sholat ini
-const data = collectYearPrayerData(cleanPrayer);
-
-// Buat grafik
-createChart(data, cleanPrayer);
-}
-
-// =============================
-// INIT
-// =============================
-window.addEventListener('load', () => {
-initBattery();
-initInternetInfo();
-initIP();
-
-// Inisialisasi grafik dengan sholat berikutnya
-updateChartForNextPrayer('Subuh');
-
-// Update grafik saat tema berubah
-themeBtn.addEventListener('click', () => {
-setTimeout(() => {
-const now = nowJakarta();
-const prayers = buildPrayers(now).filter(p => !isNaN(p.when));
-if (prayers.length > 0) {
-let { next } = findPrevNext(prayers, now);
-updateChartForNextPrayer(next.name);
-}
-}, 100); // Tunggu sedikit agar tema berubah dulu
-});
-});
-
-updateAll();
-setInterval(updateAll, 1000); // Update setiap detik untuk menampilkan waktu yang akurat
-
-// Kurangi frekuensi update progress bar untuk mengurangi beban
-setInterval(updateProgressBarBySeconds, 200); // Update setiap 200ms bukan 100ms
-
-// PERBAIKAN: Update jam setiap detik
-setInterval(updateClock, 1000);
-
-</script>
+    updateAll();
+    setInterval(updateAll, 1000);
+    // End: Content of sholat only.html <script>
+  </script>
 </body>
 </html>
