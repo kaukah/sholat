@@ -81,10 +81,10 @@
     
     /* ---------- SHOLAT AREA (New) ---------- */
     .sholat-area {
-	          font-size: clamp(20px, 5vw, 30px); /* Reduced size for sub-info */
+      font-size: clamp(20px, 5vw, 30px); /* Reduced size for sub-info */
       flex: 0 0 auto;
       margin-left:25px;
-            margin-top:25px;
+      margin-top:25px;
       width: 80%; /* 80% of the quote-area/info-wrap width as requested */
       min-width: 300px;
       color: var(--white);
@@ -107,6 +107,17 @@
       color: #FFAA00;
       font-weight: 400;
       line-height: 1;
+    }
+
+    /* Efek blink untuk teks iqomah */
+    .blink {
+      animation: blink-animation 1s infinite;
+    }
+    
+    @keyframes blink-animation {
+      0% { opacity: 1; }
+      50% { opacity: 0.5; }
+      100% { opacity: 1; }
     }
 
     @media (max-aspect-ratio:3/4){
@@ -146,13 +157,10 @@
     <div class="info-wrap">
       <div class="quote-area">
         <div class="quote" id="quote">Loading quote...</div>
-
       </div>
-      _____
       <div class="sholat-area">
-
         <div id="sholat-container">
-          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -401,7 +409,7 @@
     
     // Begin: Content of sholat only.html <script>
     const TZ = 'Asia/Jakarta';
-    const IQOMAH_MIN = 15 * 60000;
+    const IQOMAH_MIN = 20 * 60000; // Diubah dari 15 menit menjadi 20 menit
     const pad = n => String(n).padStart(2, '0');
     const fmtHM = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
     const nowJakarta = () => new Date(new Date().toLocaleString('en-US', {
@@ -513,11 +521,13 @@
         const hh = Math.floor(diff / 3600000);
         const mm = Math.floor((diff % 3600000) / 60000);
         const prayerText = upcoming.name.toLowerCase().includes('terbit') ?
-          `menuju ${upcoming.name}` : `lagi adzan ${upcoming.name}`;
+          `menuju ${upcoming.name} (${upcoming.hm})` : 
+          `lagi adzan ${upcoming.name} (${upcoming.hm})`;
         mainEl.innerHTML = `<strong>${hh > 0 ? hh + " Jam " : ""}${mm} menit </strong><span><i>${prayerText}</i></span>`;
       } else if (now >= adzanTime && now < iqomahEnd && hasIqomah(upcoming.name)) {
         const diff = Math.ceil((iqomahEnd - now) / 60000);
-        mainEl.innerHTML = `<strong>${diff} menit</strong><span><i> lagi iqomah ${upcoming.name}</i></span>`;
+        // Tambahkan kelas blink untuk efek berkedip dan waktu sholat
+        mainEl.innerHTML = `<strong class="blink">${diff} menit</strong><span><i> lagi iqomah ${upcoming.name} (${upcoming.hm})</i></span>`;
       } else {
         mainEl.innerHTML = '<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';
       }
