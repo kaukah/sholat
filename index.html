@@ -108,6 +108,9 @@
       font-weight: 400;
       line-height: 1;
     }
+    .sholat-area {
+    flex-direction: column;
+}
 
     /* Efek blink untuk teks iqomah */
     .blink {
@@ -158,10 +161,10 @@
       <div class="quote-area">
         <div class="quote" id="quote">Loading quote...</div>
       </div>
-      <div class="sholat-area">
-        <div id="sholat-container">
-        </div>
-      </div>
+<div class="sholat-area">
+  <div id="sholat-container"></div>
+  <div id="elapsed" style="margin-top:10px; font-size:22px; color:#5c5c5c;"></div>
+</div>
     </div>
   </div>
   <script>
@@ -397,6 +400,10 @@
       setTimeout(updateQuote, 60000); // Update every 60 seconds
     }
 
+
+
+
+
     // Start the quote update
     updateQuote();
 
@@ -405,11 +412,23 @@
     // but the part that defines the HTML structure/style is already moved to the head/body.
 
     const sholatContainer = document.getElementById('sholat-container');
+
+// Format durasi menjadi "X jam Y menit"
+function formatDuration(ms) {
+  const totalMin = Math.floor(ms / 60000);
+  const h = Math.floor(totalMin / 60);
+  const m = totalMin % 60;
+  if (h > 0) return `${h} jam ${m} menit`;
+  return `${m} menit`;
+}
+
+
+
     sholatContainer.innerHTML = '<div id="mainText"><strong>—</strong><span><i></i></span></div>';
     
     // Begin: Content of sholat only.html <script>
     const TZ = 'Asia/Jakarta';
-    const IQOMAH_MIN = 20 * 60000; // Diubah dari 15 menit menjadi 20 menit
+    const IQOMAH_MIN = 15 * 60000; // Diubah dari 15 menit menjadi 20 menit
     const pad = n => String(n).padStart(2, '0');
     const fmtHM = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
     const nowJakarta = () => new Date(new Date().toLocaleString('en-US', {
@@ -531,7 +550,20 @@
       } else {
         mainEl.innerHTML = '<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';
       }
+      
+      // --- DURASI SEJAK SHOLAT SEBELUMNYA ---
+if (prev && prev.when) {
+  const elapsedMs = now - prev.when;
+  if (elapsedMs > 0) {
+    const el = document.getElementById('elapsed');
+    el.textContent = `${prev.name} sudah lewat ${formatDuration(elapsedMs)}`;
+  }
+}
+      
     }
+
+
+
 
     updateAll();
     setInterval(updateAll, 1000);
