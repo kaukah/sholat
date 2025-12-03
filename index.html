@@ -150,6 +150,40 @@
         text-align: center;
       }
     }
+    
+     /* tampilan tablet */
+  @media (max-width: 1500px) {
+  /* BATASI ukuran jam */
+  .clock-area {
+    flex: 0 0 40%;        /* lebih kecil */
+    min-width: 260px !important; /* sebelumnya 420px, terlalu besar */
+    min-height: 260px !important;
+  }
+
+  canvas#clock {
+    width: 70vw !important;
+    height: 70vw !important;
+    max-width: 500px !important;
+    max-height: 500px !important;
+  }
+
+  /* PERKECIL area quote agar tidak menabrak jam */
+  .info-wrap {
+    flex: 0 0 55% !important;  /* sebelumnya 60% */
+    max-width: 55% !important;
+  }
+
+  .quote {
+    font-size: 34px !important; /* lebih kecil dari 50px */
+    line-height: 1.3 !important;
+    padding: 10px !important;
+  }
+
+  /* Rapikan agar tidak menjorok */
+  .quote-area {
+    justify-content: flex-start !important;
+  }
+}
   </style>
 </head>
 <body>
