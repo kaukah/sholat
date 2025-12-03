@@ -100,6 +100,7 @@
       text-align: left;
       width: 100%;
     }
+    
     #mainText strong {
     }
     
@@ -122,6 +123,35 @@
       50% { opacity: 0.5; }
       100% { opacity: 1; }
     }
+
+    /* Tampilan khusus untuk 15 menit sebelum adzan dan iqomah */
+    .focus-mode {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
+    
+    .focus-text {
+      text-align: center;
+      color: white;
+      font-size: 10vw;
+      line-height: 1.3;
+    }
+    
+  .focus-text strong {
+    display: block;
+    font-weight: bold;
+    color: orange;
+    font-size: 15vw;
+    font-weight: 900; 
+  }
 
     @media (max-aspect-ratio:3/4){
       .wrap{
@@ -148,6 +178,9 @@
       }
       #mainText {
         text-align: center;
+      }
+      .focus-text {
+        font-size: 15vw;
       }
     }
     
@@ -182,8 +215,8 @@
       font-size: 25px;
       }
 #datetime-display{
-	      font-size: 25px !important;
-	
+          font-size: 25px !important;
+    
 }
   /* Rapikan agar tidak menjorok */
   .quote-area {
@@ -193,7 +226,7 @@
   </style>
 </head>
 <body>
-  <div class="wrap">
+  <div class="wrap" id="normalView">
     <div class="clock-area">
       <canvas id="clock"></canvas>
     </div>
@@ -226,6 +259,15 @@
 
     </div>
   </div>
+  
+  <!-- Tampilan khusus untuk 15 menit sebelum adzan dan iqomah -->
+  <div class="focus-mode" id="focusView" style="display: none;">
+    <div class="focus-text">
+      <strong id="focusTime">menit</strong>
+      <span id="focusMessage">lagi iqomah ashar</span>
+    </div>
+  </div>
+  
   <script>
     /* ---------- CLOCK ---------- */
     const canvas=document.getElementById('clock');
@@ -380,7 +422,7 @@ updateDateTime();
 "🎁 Sukses itu bonus, tugas kita adalah ikhtiar dan cari ridho Allah",
 "🥚 Jangan taruh semua telur dalam satu keranjang",
 "😈 Musuh paling menakutkan = Hawa nafsu bermaksiat",
-"🛡️ Hasbunallah wa ni’mal wakil – Cukuplah Allah sebagai penolong",
+"🛡️ Hasbunallah wa ni'mal wakil – Cukuplah Allah sebagai penolong",
 "😓 Lelahlah dalam ketaatan, karena surga tidak dikelilingi kenyamanan",
 "🚶‍♂️ Hidup bukan soal siapa yang cepat, tapi siapa yang istiqomah",
 "🌌 Jangan remehkan dirimu — bisa jadi doa 1/3 malam mengalahkan rencanamu seumur hidup",
@@ -466,7 +508,7 @@ updateDateTime();
 "🌿 Orang tua yang sholeh melahirkan anak yang sholeh",
 "🤲 Ya Allah, aku ridho dengan takdir-Mu.",
 "🌤️ Wong duwe Gusti Allah kok bingung — tenang, tetap husnuzon.",
-"📖 Al-Qur’an adalah penawar segala penyakit",
+"📖 Al-Qur'an adalah penawar segala penyakit",
 "🔥 Jika Mimpi besar, Nyali tidak boleh kecil",
 "💫 Rezeki tdk akan salah alamat,buah yg kamu makan sdh tertulis jd rezekimu sejak benihnya ditanam",
 "💎 Sehat itu nikmat no 2,  Rezeki No 3, Nikmat beribadah kepada Allah = tertinggi No 1",
@@ -481,10 +523,6 @@ updateDateTime();
       quoteEl.textContent = quotes[randomIndex];
       setTimeout(updateQuote, 60000); // Update every 60 seconds
     }
-
-
-
-
 
     // Start the quote update
     updateQuote();
@@ -503,8 +541,6 @@ function formatDuration(ms) {
   if (h > 0) return `${h} jam ${m} menit`;
   return `${m} menit`;
 }
-
-
 
     sholatContainer.innerHTML = '<div id="mainText"><strong>—</strong><span><i></i></span></div>';
     
@@ -584,6 +620,43 @@ function formatDuration(ms) {
       };
     }
 
+    // Fungsi untuk menampilkan tampilan fokus
+    function showFocusView(minutes, message, isBlink = false) {
+      const normalView = document.getElementById('normalView');
+      const focusView = document.getElementById('focusView');
+      const focusTime = document.getElementById('focusTime');
+      const focusMessage = document.getElementById('focusMessage');
+      
+      // Sembunyikan tampilan normal
+      normalView.style.display = 'none';
+      
+      // Tampilkan tampilan fokus
+      focusView.style.display = 'flex';
+      
+      // Set teks
+      focusTime.textContent = `${minutes} menit`;
+      focusMessage.textContent = message;
+      
+      // Tambahkan efek blink jika diperlukan
+      if (isBlink) {
+        focusTime.classList.add('blink');
+      } else {
+        focusTime.classList.remove('blink');
+      }
+    }
+    
+    // Fungsi untuk kembali ke tampilan normal
+    function showNormalView() {
+      const normalView = document.getElementById('normalView');
+      const focusView = document.getElementById('focusView');
+      
+      // Tampilkan tampilan normal
+      normalView.style.display = 'flex';
+      
+      // Sembunyikan tampilan fokus
+      focusView.style.display = 'none';
+    }
+
     function updateAll() {
       const now = nowJakarta();
       const prayers = buildPrayers(now).filter(p => !isNaN(p.when));
@@ -617,35 +690,46 @@ function formatDuration(ms) {
       const iqomahEnd = hasIqomah(upcoming.name) ? new Date(adzanTime.getTime() + IQOMAH_MIN) : adzanTime;
       const mainEl = document.getElementById('mainText');
 
-      if (now < adzanTime) {
-        const diff = adzanTime - now;
-        const hh = Math.floor(diff / 3600000);
-        const mm = Math.floor((diff % 3600000) / 60000);
-        const prayerText = upcoming.name.toLowerCase().includes('terbit') ?
-          `menuju ${upcoming.name} (${upcoming.hm})` : 
-          `lagi adzan ${upcoming.name} (${upcoming.hm})`;
-        mainEl.innerHTML = `<strong>${hh > 0 ? hh + " Jam " : ""}${mm} menit </strong><span><i>${prayerText}</i></span>`;
+      // Cek apakah kita dalam 15 menit sebelum adzan
+      const fifteenMinutesBeforeAdzan = new Date(adzanTime.getTime() - 15 * 60000);
+      
+      if (now >= fifteenMinutesBeforeAdzan && now < adzanTime) {
+        // Dalam 15 menit sebelum adzan
+        const diff = Math.ceil((adzanTime - now) / 60000);
+        showFocusView(diff, `lagi adzan ${upcoming.name} (${upcoming.hm})`);
       } else if (now >= adzanTime && now < iqomahEnd && hasIqomah(upcoming.name)) {
+        // Dalam waktu iqomah
         const diff = Math.ceil((iqomahEnd - now) / 60000);
-        // Tambahkan kelas blink untuk efek berkedip dan waktu sholat
-        mainEl.innerHTML = `<strong class="blink">${diff} menit</strong><span><i> lagi iqomah ${upcoming.name} (${upcoming.hm})</i></span>`;
+        showFocusView(diff, `lagi iqomah ${upcoming.name} (${upcoming.hm})`, true);
       } else {
-        mainEl.innerHTML = '<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';
+        // Kembali ke tampilan normal
+        showNormalView();
+        
+        if (now < adzanTime) {
+          const diff = adzanTime - now;
+          const hh = Math.floor(diff / 3600000);
+          const mm = Math.floor((diff % 3600000) / 60000);
+          const prayerText = upcoming.name.toLowerCase().includes('terbit') ?
+            `menuju ${upcoming.name} (${upcoming.hm})` : 
+            `lagi adzan ${upcoming.name} (${upcoming.hm})`;
+          mainEl.innerHTML = `<strong>${hh > 0 ? hh + " Jam " : ""}${mm} menit </strong><span><i>${prayerText}</i></span>`;
+        } else if (now >= adzanTime && now < iqomahEnd && hasIqomah(upcoming.name)) {
+          const diff = Math.ceil((iqomahEnd - now) / 60000);
+          mainEl.innerHTML = `<strong class="blink">${diff} menit</strong><span><i> lagi iqomah ${upcoming.name} (${upcoming.hm})</i></span>`;
+        } else {
+          mainEl.innerHTML = '<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';
+        }
       }
       
       // --- DURASI SEJAK SHOLAT SEBELUMNYA ---
-if (prev && prev.when) {
-  const elapsedMs = now - prev.when;
-  if (elapsedMs > 0) {
-    const el = document.getElementById('elapsed');
-    el.textContent = `${prev.name} sudah lewat ${formatDuration(elapsedMs)}`;
-  }
-}
-      
+      if (prev && prev.when) {
+        const elapsedMs = now - prev.when;
+        if (elapsedMs > 0) {
+          const el = document.getElementById('elapsed');
+          el.textContent = `${prev.name} sudah lewat ${formatDuration(elapsedMs)}`;
+        }
+      }
     }
-
-
-
 
     updateAll();
     setInterval(updateAll, 1000);
