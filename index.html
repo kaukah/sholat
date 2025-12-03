@@ -158,7 +158,11 @@
       <canvas id="clock"></canvas>
     </div>
     <div class="info-wrap">
-      <div class="quote-area">
+<div id="datetime-display" style="font-size:32px; margin-left:25px; opacity:0.85; color:orange;">
+  <span id="dt-time" style="font-weight:700;"></span>
+  <span id="dt-day"></span>
+</div>
+<div class="quote-area">
         <div class="quote" id="quote">Loading quote...</div>
       </div>
 <div class="sholat-area">
@@ -226,6 +230,29 @@
     function tick(){drawClock();requestAnimationFrame(tick);}
     requestAnimationFrame(tick);
     window.addEventListener('resize',()=>{resizeCanvas();drawClock();});
+
+/* ---------- DATETIME BAR ---------- */
+const timeEl = document.getElementById('dt-time');
+const dayEl  = document.getElementById('dt-day');
+
+function updateDateTime() {
+  const now = new Date();
+  const days = ["- Ahad","- Senin","- Selasa","- Rabu","- Kamis","- Jumat","- Sabtu"];
+  const months = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Aug","Sep","Okt","Nov","Des"];
+
+  const hh = String(now.getHours()).padStart(2,'0');
+  const mm = String(now.getMinutes()).padStart(2,'0');
+  const d  = days[now.getDay()];
+  const dd = String(now.getDate()).padStart(2,'0');
+  const mmm = months[now.getMonth()];
+
+  timeEl.textContent = `${hh}:${mm} `;
+  dayEl.textContent  = `${d} ${dd} ${mmm}`;
+}
+
+setInterval(updateDateTime, 1000);
+updateDateTime();
+
 
     /* ---------- QUOTE ---------- */
     const quoteEl = document.getElementById('quote');
