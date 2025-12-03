@@ -178,7 +178,13 @@
     line-height: 1.3 !important;
     padding: 10px !important;
   }
-
+  .sholat-area {
+      font-size: 25px;
+      }
+#datetime-display{
+	      font-size: 25px !important;
+	
+}
   /* Rapikan agar tidak menjorok */
   .quote-area {
     justify-content: flex-start !important;
@@ -191,18 +197,33 @@
     <div class="clock-area">
       <canvas id="clock"></canvas>
     </div>
+    
     <div class="info-wrap">
-<div id="datetime-display" style="font-size:32px; margin-left:25px; opacity:0.85; color:orange;">
+
+<div id="datetime-display" 
+     style="
+        font-size:25px;
+        margin-left:15px;
+        background:gray;
+        color:black;
+        padding:8px 16px;
+        border-radius:14px;
+        display:inline-block;
+        font-weight:500;
+">
   <span id="dt-time" style="font-weight:700;"></span>
   <span id="dt-day"></span>
 </div>
+
 <div class="quote-area">
         <div class="quote" id="quote">Loading quote...</div>
       </div>
+      
 <div class="sholat-area">
   <div id="sholat-container"></div>
   <div id="elapsed" style="margin-top:10px; font-size:22px; color:#5c5c5c;"></div>
 </div>
+
     </div>
   </div>
   <script>
