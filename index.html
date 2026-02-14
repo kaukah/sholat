@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>New Tab</title>
   <script src="jadwalsholat.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&display=swap" rel="stylesheet">
   <style>
     :root{
       --bg:#000;
@@ -12,16 +13,21 @@
       --muted:#6b6b6b;
       --accent:#ff3b30; /* Apple red */
       --gap:48px;
-      --font-sans:system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      --font-sans: 'Inter', Arial, sans-serif;
     }
     html,body{
       height:100%;
       margin:0;
       background:var(--bg);
       color:var(--white);
-      font-family:var(--font-sans);
+      font-family: var(--font-sans);
       overflow:hidden;
       -webkit-font-smoothing:antialiased;
+      text-rendering: optimizeLegibility;
+    }
+    @font-face {
+      font-family: 'MyFont';
+      src: url('font.woff2') format('woff2');
     }
     .wrap{
       display:flex;
@@ -110,8 +116,8 @@
       line-height: 1;
     }
     .sholat-area {
-    flex-direction: column;
-}
+      flex-direction: column;
+    }
 
     /* Efek blink untuk teks iqomah */
     .blink {
@@ -145,19 +151,43 @@
       line-height: 1.3;
     }
     
-  .focus-text strong {
-    display: block;
-    font-weight: bold;
-    color: orange;
-    font-size: 15vw;
-    font-weight: 900; 
-  }
+    .focus-text strong {
+      display: block;
+      font-weight: bold;
+      color: orange;
+      font-size: 15vw;
+      font-weight: 900; 
+    }
 
     @media (max-aspect-ratio:3/4){
       .wrap{
         flex-direction:column;
         padding:24px;
         justify-content: flex-start; /* Adjust for mobile/vertical layout */
+      }
+
+      #datetime-display{
+        width: fit-content;
+        margin-left: 0 !important;
+        display: block !important;
+        margin-right: auto;
+        margin-left: auto !important;
+        text-align: center;
+      }
+      .clock-area {
+        justify-content: center !important;
+        min-width: 0 !important;
+        min-height: 0 !important;
+        width: 100%;
+      }
+      .sholat-area {
+        margin-left: 0 !important;
+        margin-top: 10px !important;
+        width: 100% !important;
+      }
+      canvas#clock{
+        width: min(48vh, 70vw) !important;
+        height: min(48vh, 70vw) !important;
       }
       .clock-area, .info-wrap{
         width:100%;
@@ -169,8 +199,10 @@
       }
       .info-wrap{margin-top:12px;}
       .quote {
-          font-size: 32px; /* Smaller font on mobile */
-          text-align: center;
+        font-size: 22px !important;
+        padding: 6px !important;
+        line-height: 1.3 !important;
+        text-align: center;
       }
       .sholat-area {
         width: 100%;
@@ -184,45 +216,45 @@
       }
     }
     
-     /* tampilan tablet */
-  @media (max-width: 1500px) {
-  /* BATASI ukuran jam */
-  .clock-area {
-    flex: 0 0 40%;        /* lebih kecil */
-    min-width: 260px !important; /* sebelumnya 420px, terlalu besar */
-    min-height: 260px !important;
-  }
-
-  canvas#clock {
-    width: 70vw !important;
-    height: 70vw !important;
-    max-width: 500px !important;
-    max-height: 500px !important;
-  }
-
-  /* PERKECIL area quote agar tidak menabrak jam */
-  .info-wrap {
-    flex: 0 0 55% !important;  /* sebelumnya 60% */
-    max-width: 55% !important;
-  }
-
-  .quote {
-    font-size: 34px !important; /* lebih kecil dari 50px */
-    line-height: 1.3 !important;
-    padding: 10px !important;
-  }
-  .sholat-area {
-      font-size: 25px;
+    /* tampilan tablet */
+@media (min-width: 901px) and (max-width: 1500px) {
+      /* BATASI ukuran jam */
+      .clock-area {
+        flex: 0 0 40%;        /* lebih kecil */
+        min-width: 260px !important; /* sebelumnya 420px, terlalu besar */
+        min-height: 260px !important;
       }
-#datetime-display{
-          font-size: 25px !important;
-    
-}
-  /* Rapikan agar tidak menjorok */
-  .quote-area {
-    justify-content: flex-start !important;
-  }
-}
+
+      canvas#clock {
+        width: 70vw !important;
+        height: 70vw !important;
+        max-width: 500px !important;
+        max-height: 500px !important;
+      }
+
+      /* PERKECIL area quote agar tidak menabrak jam */
+      .info-wrap {
+        flex: 0 0 55% !important;  /* sebelumnya 60% */
+        max-width: 55% !important;
+      }
+
+      .quote {
+        font-size: 34px !important; /* lebih kecil dari 50px */
+        line-height: 1.3 !important;
+        padding: 10px !important;
+      }
+      .sholat-area {
+        font-size: 25px;
+      }
+      #datetime-display{
+        font-size: 25px !important;
+
+      }
+      /* Rapikan agar tidak menjorok */
+      .quote-area {
+        justify-content: flex-start !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -233,128 +265,133 @@
     
     <div class="info-wrap">
 
-<div id="datetime-display" 
-     style="
-        font-size:25px;
-        margin-left:15px;
-        background:gray;
-        color:black;
-        padding:8px 16px;
-        border-radius:14px;
-        display:inline-block;
-        font-weight:500;
-">
-  <span id="dt-time" style="font-weight:700;"></span>
-  <span id="dt-day"></span>
+     <div class="sholat-area">
+      <div id="sholat-container"></div>
+      <div id="elapsed" style="margin-top:10px; font-size:22px; color:#5c5c5c;"></div>
+    </div>
+
+    <div id="datetime-display" 
+    style="
+    font-size:25px;
+    margin-left:15px;
+    background:orange;
+    color:black;
+    padding:8px 16px;
+    border-radius:14px;
+    display:inline-block;
+    font-weight:500;
+    ">
+    <span id="dt-time" style="font-weight:700;"></span>
+    <span id="dt-day"></span>
+  </div>
+
+  <div class="quote-area">
+    <div class="quote" id="quote">Loading quote...</div>
+  </div>
+
+
+
+</div>
 </div>
 
-<div class="quote-area">
-        <div class="quote" id="quote">Loading quote...</div>
-      </div>
-      
-<div class="sholat-area">
-  <div id="sholat-container"></div>
-  <div id="elapsed" style="margin-top:10px; font-size:22px; color:#5c5c5c;"></div>
+<!-- Tampilan khusus untuk 15 menit sebelum adzan dan iqomah -->
+<div class="focus-mode" id="focusView" style="display: none;">
+  <div class="focus-text">
+    <strong id="focusTime">menit</strong>
+    <span id="focusMessage">lagi iqomah ashar</span>
+  </div>
 </div>
 
-    </div>
-  </div>
-  
-  <!-- Tampilan khusus untuk 15 menit sebelum adzan dan iqomah -->
-  <div class="focus-mode" id="focusView" style="display: none;">
-    <div class="focus-text">
-      <strong id="focusTime">menit</strong>
-      <span id="focusMessage">lagi iqomah ashar</span>
-    </div>
-  </div>
-  
-  <script>
+
+<audio id="sfxIqomah" src="https://sragen.netlify.app/sfx-3.mp3" preload="auto"></audio>
+
+<script>
     /* ---------- CLOCK ---------- */
-    const canvas=document.getElementById('clock');
-    const ctx=canvas.getContext('2d');
-    function resizeCanvas(){
-      const dpr=window.devicePixelRatio||1;
-      const rect=canvas.getBoundingClientRect();
-      canvas.width=Math.round(rect.width*dpr);
-      canvas.height=Math.round(rect.height*dpr);
-      ctx.setTransform(dpr,0,0,dpr,0,0);
-    }
-    function drawClock(){
-      resizeCanvas();
-      const w=canvas.width/(window.devicePixelRatio||1);
-      const h=canvas.height/(window.devicePixelRatio||1);
-      const cx=w/2,cy=h/2;
-      const r=Math.min(w,h)/2*0.92;
-      ctx.clearRect(0,0,w,h);
-      ctx.save();ctx.translate(cx,cy);
-      for(let i=0;i<60;i++){
-        ctx.beginPath();
-        const ang=i*Math.PI/30;
-        const inner=r*(i%5===0?0.82:0.88);
-        const outer=r*0.97;
-        ctx.lineWidth=i%5===0?3:1.3;
-        ctx.strokeStyle=i%5===0?'rgba(255,255,255,0.95)':'rgba(255,255,255,0.25)';
-        ctx.moveTo(Math.cos(ang)*inner,Math.sin(ang)*inner);
-        ctx.lineTo(Math.cos(ang)*outer,Math.sin(ang)*outer);
-        ctx.stroke();
-      }
-      ctx.fillStyle='white';
-      ctx.font=`${Math.round(r*0.14)}px system-ui`;
-      ctx.textAlign='center';
-      ctx.textBaseline='middle';
-      for(let n=1;n<=12;n++){
-        const ang=n*Math.PI/6 - Math.PI/2;
-        ctx.fillText(n,Math.cos(ang)*r*0.64,Math.sin(ang)*r*0.64);
-      }
-      const now=new Date();
-      const s=now.getSeconds()+now.getMilliseconds()/1000;
-      const m=now.getMinutes()+s/60;
-      const hr=(now.getHours()%12)+m/60;
-      drawHand(hr*Math.PI/6-Math.PI/2,r*0.48,Math.max(12,r*0.045),'white');
-      drawHand(m*Math.PI/30-Math.PI/2,r*0.78,Math.max(7,r*0.035),'white');
-      drawHand(s*Math.PI/30-Math.PI/2,r*0.9,Math.max(2,r*0.008),'#ff8000',-r*0.18);
-      ctx.restore();
-    }
-    function drawHand(angle,length,width,color,backLength=0){
+  const canvas=document.getElementById('clock');
+  const ctx=canvas.getContext('2d');
+  function resizeCanvas(){
+    const dpr=window.devicePixelRatio||1;
+    const rect=canvas.getBoundingClientRect();
+    canvas.width=Math.round(rect.width*dpr);
+    canvas.height=Math.round(rect.height*dpr);
+    ctx.setTransform(dpr,0,0,dpr,0,0);
+  }
+  function drawClock(){
+    resizeCanvas();
+    const w=canvas.width/(window.devicePixelRatio||1);
+    const h=canvas.height/(window.devicePixelRatio||1);
+    const cx=w/2,cy=h/2;
+    const r=Math.min(w,h)/2*0.92;
+    ctx.clearRect(0,0,w,h);
+    ctx.save();ctx.translate(cx,cy);
+    for(let i=0;i<60;i++){
       ctx.beginPath();
-      ctx.lineWidth=width;
-      ctx.lineCap='round';
-      ctx.strokeStyle=color;
-      ctx.moveTo(Math.cos(angle)*backLength,Math.sin(angle)*backLength);
-      ctx.lineTo(Math.cos(angle)*length,Math.sin(angle)*length);
+      const ang=i*Math.PI/30;
+      const inner=r*(i%5===0?0.82:0.88);
+      const outer=r*0.97;
+      ctx.lineWidth=i%5===0?3:1.3;
+      ctx.strokeStyle=i%5===0?'rgba(255,255,255,0.95)':'rgba(255,255,255,0.25)';
+      ctx.moveTo(Math.cos(ang)*inner,Math.sin(ang)*inner);
+      ctx.lineTo(Math.cos(ang)*outer,Math.sin(ang)*outer);
       ctx.stroke();
     }
-    function tick(){drawClock();requestAnimationFrame(tick);}
-    requestAnimationFrame(tick);
-    window.addEventListener('resize',()=>{resizeCanvas();drawClock();});
+    ctx.fillStyle='white';
+    ctx.font=`${Math.round(r*0.14)}px system-ui`;
+    ctx.textAlign='center';
+    ctx.textBaseline='middle';
+    for(let n=1;n<=12;n++){
+      const ang=n*Math.PI/6 - Math.PI/2;
+      ctx.fillText(n,Math.cos(ang)*r*0.64,Math.sin(ang)*r*0.64);
+    }
+    const now=new Date();
+    const s=now.getSeconds()+now.getMilliseconds()/1000;
+    const m=now.getMinutes()+s/60;
+    const hr=(now.getHours()%12)+m/60;
+    drawHand(hr*Math.PI/6-Math.PI/2,r*0.48,Math.max(12,r*0.045),'white');
+    drawHand(m*Math.PI/30-Math.PI/2,r*0.78,Math.max(7,r*0.035),'white');
+    drawHand(s*Math.PI/30-Math.PI/2,r*0.9,Math.max(2,r*0.008),'#ff8000',-r*0.18);
+    ctx.restore();
+  }
+  function drawHand(angle,length,width,color,backLength=0){
+    ctx.beginPath();
+    ctx.lineWidth=width;
+    ctx.lineCap='round';
+    ctx.strokeStyle=color;
+    ctx.moveTo(Math.cos(angle)*backLength,Math.sin(angle)*backLength);
+    ctx.lineTo(Math.cos(angle)*length,Math.sin(angle)*length);
+    ctx.stroke();
+  }
+  function tick(){drawClock();requestAnimationFrame(tick);}
+  requestAnimationFrame(tick);
+  window.addEventListener('resize',()=>{resizeCanvas();drawClock();});
 
 /* ---------- DATETIME BAR ---------- */
-const timeEl = document.getElementById('dt-time');
-const dayEl  = document.getElementById('dt-day');
+  const timeEl = document.getElementById('dt-time');
+  const dayEl  = document.getElementById('dt-day');
 
-function updateDateTime() {
-  const now = new Date();
-  const days = ["- Ahad","- Senin","- Selasa","- Rabu","- Kamis","- Jumat","- Sabtu"];
-  const months = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Aug","Sep","Okt","Nov","Des"];
+  function updateDateTime() {
+    const now = new Date();
+    const days = ["- Ahad","- Senin","- Selasa","- Rabu","- Kamis","- Jumat","- Sabtu"];
+    const months = ["Jan","Feb","Mar","Apr","Mei","Jun","Jul","Aug","Sep","Okt","Nov","Des"];
 
-  const hh = String(now.getHours()).padStart(2,'0');
-  const mm = String(now.getMinutes()).padStart(2,'0');
-  const d  = days[now.getDay()];
-  const dd = String(now.getDate()).padStart(2,'0');
-  const mmm = months[now.getMonth()];
+    const hh = String(now.getHours()).padStart(2,'0');
+    const mm = String(now.getMinutes()).padStart(2,'0');
+    const d  = days[now.getDay()];
+    const dd = String(now.getDate()).padStart(2,'0');
+    const mmm = months[now.getMonth()];
 
-  timeEl.textContent = `${hh}:${mm} `;
-  dayEl.textContent  = `${d} ${dd} ${mmm}`;
-}
+    timeEl.textContent = `${hh}:${mm} `;
+    dayEl.textContent  = `${d} ${dd} ${mmm}`;
+  }
 
-setInterval(updateDateTime, 1000);
-updateDateTime();
+  setInterval(updateDateTime, 1000);
+  updateDateTime();
 
 
     /* ---------- QUOTE ---------- */
-    const quoteEl = document.getElementById('quote');
-    const quotes = [
-"🙏 Bahagia itu sederhana: Hati yang penuh bersyukur",
+  const quoteEl = document.getElementById('quote');
+  const quotes = [
+    "🙏 Bahagia itu sederhana: Hati yang penuh bersyukur",
 "🌟 Dream Create Future",
 "🌗 Dunia itu Bayangan, Akhirat itu Cahaya",
 "🐇❌ Mengejar 2 Kelinci akan kehilangan keduanya",
@@ -422,7 +459,7 @@ updateDateTime();
 "🎁 Sukses itu bonus, tugas kita adalah ikhtiar dan cari ridho Allah",
 "🥚 Jangan taruh semua telur dalam satu keranjang",
 "😈 Musuh paling menakutkan = Hawa nafsu bermaksiat",
-"🛡️ Hasbunallah wa ni'mal wakil – Cukuplah Allah sebagai penolong",
+"🛡️ Hasbunallah wa ni’mal wakil – Cukuplah Allah sebagai penolong",
 "😓 Lelahlah dalam ketaatan, karena surga tidak dikelilingi kenyamanan",
 "🚶‍♂️ Hidup bukan soal siapa yang cepat, tapi siapa yang istiqomah",
 "🌌 Jangan remehkan dirimu — bisa jadi doa 1/3 malam mengalahkan rencanamu seumur hidup",
@@ -496,31 +533,41 @@ updateDateTime();
 "💭 Kadang kita merasa kekurangan, tapi sebenarnya kita yang tidak pernah merasa cukup dan kurang bersyukur",
 "🌟 HIDUP JGN SEDERHANA, Hidup itu harus hebat, luas, kuat, besar dan bermanfaat. Yg SEDERHANA sikapnya",
 "💼 Teken Tekun Tekan - Pegang, Konsisten, Tercapai",
-"",
 "🏆 Wong seng Temen Bakal Tinemu - Manjadda Wajada",
 "💪 Kelihatannya Tidak Mudah tapi insyaallah BISA 💪",
 "😔 Mungkin ada dosa yang membuat rejeki kita tertahan",
 "💫 Rahasia Frekuensi Rejeki = Bukan produk yg sulit laku, tp hati kita blm ikhlas pasrah dan yakin",
 "🌱 Ekonomi boleh sulit, tapi hati jangan ikut sempit. Karna sulit adalah keadaan tercepat dekat dengan Allah",
-"Kemampuan + Kesempatan = Keberuntungan",
 "🤝 Sedekah menarik keberuntungan - Keberuntungan mendatangkan rejeki",
 "⚖️ Bukan soal siapa yang paling cepat, tp siapa yg dikasih Allah keberuntungan (Tukang Parkir RS)",
 "🌿 Orang tua yang sholeh melahirkan anak yang sholeh",
 "🤲 Ya Allah, aku ridho dengan takdir-Mu.",
 "🌤️ Wong duwe Gusti Allah kok bingung — tenang, tetap husnuzon.",
-"📖 Al-Qur'an adalah penawar segala penyakit",
+"📖 Al-Qur’an adalah penawar segala penyakit",
 "🔥 Jika Mimpi besar, Nyali tidak boleh kecil",
-"💫 Rezeki tdk akan salah alamat,buah yg kamu makan sdh tertulis jd rezekimu sejak benihnya ditanam",
+"💫 Rezeki tdk akan salah alamat, buah yg kamu makan sdh tertulis jd rezekimu sejak benihnya ditanam",
 "💎 Sehat itu nikmat no 2,  Rezeki No 3, Nikmat beribadah kepada Allah = tertinggi No 1",
-"🌾 Keberkahan itu membuat rezeki yang sedikit terasa kebanyakan, bukan yang banyak jadi tidak cukup",
-"💼 Kerja itu ibadah, Rezeki itu Jatah",
+"🌾 Keberkahan itu membuat REJEKI yang sedikit terasa kebanyakan, bukan yang banyak jadi tidak cukup",
+"💼 Kerja itu IBADAH, Rezeki itu JATAH",
 "📜 Rezeki dan Kerja Keras tidak ada hubungannya sama sekali. (Hikam)",
-"Kemampuan + Kesempatan = Keberuntungan",
-    ];
+"⭐ Kemampuan + Kesempatan = LUCK",
+"💼 Mental Karyawan = Cara Habisin Uang, Mental Pebisnis = Cara Hasilin Uang",
+"🙏 Sampai kapanpun hidup akan terasa kurang jika standar bersyukur kita ditentukan dengan melihat orang lain",
+"🌱 Yang bikin kita tenang & bersyukur adalah cara kita menghargai apa yang kita punya",
+"⚠️ Wajah melas & malas itu dilarang agama (Gus Kautsar)",
+"🚪 Ketika satu pintu tertutup, maka pintu lain akan terbuka",
+"🤲 Ya Allah Lindungi aku dari Anfin merah dan darah hitam dan penyakit berat.",
+"🤲 Allahumma Yassir Wala Tu'asir - Permudahkanlah Ya Allah jangan Engkau dipersulit",
+"📖 Sesungguhnya pertolongan Allah itu dekat — QS 2:214",
+"🏋️ Orang bisa menang jika mau menjalani proses yang sulit. Konsisten latihan dan tidak takut gagal",
+"👨‍👩‍👧 Jika kerjamu masih bs bersama anak dan ibadah tepat waktu, kamu sudah lebih sukses & dambaan banyak orang",
+"🔥 Bekerjalah lebih giat lagi, agar kelak kau tak membunuh mimpi anakmu karena faktor ekonomi",
+"💰 Uang itu alat, bukan tujuan — alat untuk membangun mesin uang"
+  ];
 
-    function updateQuote() {
-      const randomIndex = Math.floor(Math.random() * quotes.length);
-      quoteEl.textContent = quotes[randomIndex];
+  function updateQuote() {
+    const randomIndex = Math.floor(Math.random() * quotes.length);
+    quoteEl.textContent = quotes[randomIndex];
       setTimeout(updateQuote, 60000); // Update every 60 seconds
     }
 
@@ -534,19 +581,20 @@ updateDateTime();
     const sholatContainer = document.getElementById('sholat-container');
 
 // Format durasi menjadi "X jam Y menit"
-function formatDuration(ms) {
-  const totalMin = Math.floor(ms / 60000);
-  const h = Math.floor(totalMin / 60);
-  const m = totalMin % 60;
-  if (h > 0) return `${h} jam ${m} menit`;
-  return `${m} menit`;
-}
+    function formatDuration(ms) {
+      const totalMin = Math.floor(ms / 60000);
+      const h = Math.floor(totalMin / 60);
+      const m = totalMin % 60;
+      if (h > 0) return `${h} jam ${m} menit`;
+      return `${m} menit`;
+    }
 
     sholatContainer.innerHTML = '<div id="mainText"><strong>—</strong><span><i></i></span></div>';
     
     // Begin: Content of sholat only.html <script>
     const TZ = 'Asia/Jakarta';
-    const IQOMAH_MIN = 15 * 60000; // Diubah dari 15 menit menjadi 20 menit
+    const IQOMAH_MIN = 15 * 60000; // iqomah 15 menit
+    let playedIqomah = false;
     const pad = n => String(n).padStart(2, '0');
     const fmtHM = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
     const nowJakarta = () => new Date(new Date().toLocaleString('en-US', {
@@ -698,11 +746,18 @@ function formatDuration(ms) {
         const diff = Math.ceil((adzanTime - now) / 60000);
         showFocusView(diff, `lagi adzan ${upcoming.name} (${upcoming.hm})`);
       } else if (now >= adzanTime && now < iqomahEnd && hasIqomah(upcoming.name)) {
-        // Dalam waktu iqomah
+
+  // PLAY SFX saat iqomah mulai (sekali saja)
+        if (!playedIqomah) {
+          document.getElementById('sfxIqomah').play();
+          playedIqomah = true;
+        }
+
         const diff = Math.ceil((iqomahEnd - now) / 60000);
         showFocusView(diff, `lagi iqomah ${upcoming.name} (${upcoming.hm})`, true);
       } else {
-        // Kembali ke tampilan normal
+        playedIqomah = false;
+  // Kembali ke tampilan normal
         showNormalView();
         
         if (now < adzanTime) {
@@ -710,30 +765,30 @@ function formatDuration(ms) {
           const hh = Math.floor(diff / 3600000);
           const mm = Math.floor((diff % 3600000) / 60000);
           const prayerText = upcoming.name.toLowerCase().includes('terbit') ?
-            `menuju ${upcoming.name} (${upcoming.hm})` : 
-            `lagi adzan ${upcoming.name} (${upcoming.hm})`;
-          mainEl.innerHTML = `<strong>${hh > 0 ? hh + " Jam " : ""}${mm} menit </strong><span><i>${prayerText}</i></span>`;
-        } else if (now >= adzanTime && now < iqomahEnd && hasIqomah(upcoming.name)) {
-          const diff = Math.ceil((iqomahEnd - now) / 60000);
-          mainEl.innerHTML = `<strong class="blink">${diff} menit</strong><span><i> lagi iqomah ${upcoming.name} (${upcoming.hm})</i></span>`;
-        } else {
-          mainEl.innerHTML = '<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';
-        }
-      }
-      
-      // --- DURASI SEJAK SHOLAT SEBELUMNYA ---
-      if (prev && prev.when) {
-        const elapsedMs = now - prev.when;
-        if (elapsedMs > 0) {
-          const el = document.getElementById('elapsed');
-          el.textContent = `${prev.name} sudah lewat ${formatDuration(elapsedMs)}`;
-        }
-      }
+        `menuju ${upcoming.name} (${upcoming.hm})` : 
+      `lagi adzan ${upcoming.name} (${upcoming.hm})`;
+      mainEl.innerHTML = `<strong>${hh > 0 ? hh + " Jam " : ""}${mm} menit </strong><span><i>${prayerText}</i></span>`;
+    } else if (now >= adzanTime && now < iqomahEnd && hasIqomah(upcoming.name)) {
+      const diff = Math.ceil((iqomahEnd - now) / 60000);
+      mainEl.innerHTML = `<strong class="blink">${diff} menit</strong><span><i> lagi iqomah ${upcoming.name} (${upcoming.hm})</i></span>`;
+    } else {
+      mainEl.innerHTML = '<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';
     }
+  }
 
-    updateAll();
-    setInterval(updateAll, 1000);
+      // --- DURASI SEJAK SHOLAT SEBELUMNYA ---
+  if (prev && prev.when) {
+    const elapsedMs = now - prev.when;
+    if (elapsedMs > 0) {
+      const el = document.getElementById('elapsed');
+      el.textContent = `${prev.name} sudah lewat ${formatDuration(elapsedMs)}`;
+    }
+  }
+}
+
+updateAll();
+setInterval(updateAll, 1000);
     // End: Content of sholat only.html <script>
-  </script>
+</script>
 </body>
 </html>
