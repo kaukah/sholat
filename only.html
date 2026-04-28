@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Jadwal Sholat</title>
+<script src="jadwalsholat.js"></script>
+<style>
+html,body{margin:0;height:100%;font-family:system-ui,sans-serif;background:#000;color:#fff}
+body{display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
+#mainText{font-size:clamp(32px,8vw,80px);font-weight:700;line-height:1.2}
+#mainText span{color:#FFAA00;font-weight:400}
+</style>
+</head>
+<body>
+<div id="mainText"><strong>—</strong><span><i></i></span></div>
+
+<script>
+const TZ = 'Asia/Jakarta';
+const IQOMAH_MIN = 15 * 60000;
+const pad = n => String(n).padStart(2, '0');
+const fmtHM = d => pad(d.getHours()) + ':' + pad(d.getMinutes());
+const nowJakarta = () => new Date(new Date().toLocaleString('en-US', {
+timeZone: TZ
+}));
+
+function getKey(d) {
+const parts = new Intl.DateTimeFormat('en-CA', {
+timeZone: TZ,
+month: '2-digit',
+day: '2-digit'
+}).formatToParts(d);
+return parts.find(p => p.type === 'month').value + '-' + parts.find(p => p.type === 'day').value;
+}
+
+function parseHM(hm, base) {
+const [h, m] = hm.split(':').map(Number);
+const parts = new Intl.DateTimeFormat('en-CA', {
+timeZone: TZ,
+year: 'numeric',
+month: '2-digit',
+day: '2-digit'
+}).formatToParts(base);
+const y = parts.find(p => p.type === 'year').value;
+const M = parts.find(p => p.type === 'month').value;
+const D = parts.find(p => p.type === 'day').value;
+return new Date(`${y}-${M}-${D}T${pad(h)}:${pad(m)}:00+07:00`);
+}
+
+function getTodayTimes(d) {
+return (typeof prayerTimesData !== 'undefined') ? prayerTimesData[getKey(d)] : null;
+}
+
+function hasIqomah(prayerName) {
+return !prayerName.toLowerCase().includes('terbit');
+}
+
+function buildPrayers(now) {
+const list = [];
+const today = getTodayTimes(now);
+if (today) {
+list.push(['Subuh', today.Shubuh]);
+list.push(['Terbit', today.Terbit]);
+list.push(['Dhuhur', today.Dzuhur]);
+list.push(['Ashar', today.Ashr]);
+list.push(['Magrib', today.Maghrib]);
+list.push(['Isya', today.Isya]);
+}
+const tmr = getTodayTimes(new Date(now.getTime() + 86400000));
+if (tmr) list.push(['Subuh 🌙', tmr.Shubuh]);
+return list.map(([name, hm]) => ({
+name,
+hm,
+when: parseHM(hm, name.includes('🌙') ? new Date(now.getTime() + 86400000) : now)
+}));
+}
+
+function findPrevNext(prayers, now) {
+let next = prayers.find(p => p.when >= now);
+if (!next) next = prayers[0];
+const prevCandidates = prayers.filter(p => p.when < next.when);
+let prev = prevCandidates.length ? prevCandidates[prevCandidates.length - 1] : null;
+if (!prev) {
+const y = new Date(now.getTime() - 86400000);
+const ylist = buildPrayers(y);
+if (ylist.length) prev = ylist[ylist.length - 1];
+}
+return {
+prev,
+next
+};
+}
+
+function updateAll() {
+const now = nowJakarta();
+const prayers = buildPrayers(now).filter(p => !isNaN(p.when));
+if (prayers.length === 0) {
+document.getElementById('mainText').innerHTML = '<strong>Jadwal tidak tersedia</strong>';
+return;
+}
+
+let { prev, next } = findPrevNext(prayers, now);
+
+const currentAdzan = prayers.find(p => {
+if (!hasIqomah(p.name)) return false;
+const start = p.when;
+const end = new Date(start.getTime() + IQOMAH_MIN);
+return now >= start && now < end;
+});
+
+let upcoming = currentAdzan || next;
+
+if (currentAdzan) {
+const idx = prayers.indexOf(currentAdzan);
+if (idx > 0) {
+prev = prayers[idx - 1];
+} else {
+const ylist = buildPrayers(new Date(now.getTime() - 86400000));
+if (ylist.length) prev = ylist[ylist.length - 1];
+}
+}
+
+const adzanTime = upcoming.when;
+const iqomahEnd = hasIqomah(upcoming.name) ? new Date(adzanTime.getTime() + IQOMAH_MIN) : adzanTime;
+const mainEl = document.getElementById('mainText');
+
+if (now < adzanTime) {
+const diff = adzanTime - now;
+const hh = Math.floor(diff / 3600000);
+const mm = Math.floor((diff % 3600000) / 60000);
+const prayerText = upcoming.name.toLowerCase().includes('terbit') ?
+`menuju ${upcoming.name}` : `lagi adzan ${upcoming.name}`;
+mainEl.innerHTML = `<strong>${hh > 0 ? hh + " Jam " : ""}${mm} menit </strong><span><i>${prayerText}</i></span>`;
+} else if (now >= adzanTime && now < iqomahEnd && hasIqomah(upcoming.name)) {
+const diff = Math.ceil((iqomahEnd - now) / 60000);
+mainEl.innerHTML = `<strong>${diff} menit</strong><span><i> lagi iqomah ${upcoming.name}</i></span>`;
+} else {
+mainEl.innerHTML = '<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';
+}
+}
+
+updateAll();
+setInterval(updateAll, 1000);
+</script>
+</body>
+</html>
