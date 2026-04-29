@@ -10,11 +10,19 @@ html,body{margin:0;height:100%;font-family:system-ui,sans-serif;background:#000;
 body{display:flex;align-items:center;justify-content:center;text-align:center;padding:20px}
 #mainText{font-size:clamp(32px,8vw,80px);font-weight:700;line-height:1.2}
 #mainText span{color:#FFAA00;font-weight:400}
+#wrapper{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:10px;
+}
 </style>
 </head>
 <body>
+	<div id="wrapper">
 <div id="mainText"><strong>—</strong><span><i></i></span></div>
 
+<div id="elapsed" style="margin-top:10px;font-size:3rem;color:gray;"></div></div>
 <script>
 const TZ = 'Asia/Jakarta';
 const IQOMAH_MIN = 15 * 60000;
@@ -91,6 +99,17 @@ next
 };
 }
 
+function formatDuration(ms){
+  const m = Math.floor(ms / 60000);
+  const h = Math.floor(m / 60);
+  const mm = m % 60;
+
+  if(h > 0){
+    return `${h} jam ${mm} menit`;
+  }
+  return `${mm} menit`;
+}
+
 function updateAll() {
 const now = nowJakarta();
 const prayers = buildPrayers(now).filter(p => !isNaN(p.when));
@@ -137,6 +156,17 @@ mainEl.innerHTML = `<strong>${diff} menit</strong><span><i> lagi iqomah ${upcomi
 } else {
 mainEl.innerHTML = '<strong>Menunggu</strong><span><i> jadwal berikutnya…</i></span>';
 }
+
+
+      // --- DURASI SEJAK SHOLAT SEBELUMNYA ---
+  if (prev && prev.when) {
+    const elapsedMs = now - prev.when;
+    if (elapsedMs > 0) {
+      const el = document.getElementById('elapsed');
+      el.textContent = `${prev.name} sudah lewat ${formatDuration(elapsedMs)}`;
+    }
+  }
+
 }
 
 updateAll();
